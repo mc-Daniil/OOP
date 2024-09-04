@@ -5,7 +5,7 @@ using std::endl;
 using std::string;
 #define PROMPT "Выберите функцию: 1, 2, 3, 4"
 
-auto getChoice() -> int{
+int getChoice(){
     int choice;
     cout << PROMPT << endl;
     cin >> choice;
