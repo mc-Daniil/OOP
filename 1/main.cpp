@@ -10,7 +10,8 @@ using std::runtime_error;
 #define PROMPT "Choose function: 1, 2, 3, 4:"
 
 
-auto checkInp(int &choice) -> bool{
+template<typename T>
+auto checkInput(T &choice) -> bool{
     if (choice < 0 || choice > 4) {
         return false;
     }
@@ -18,10 +19,11 @@ auto checkInp(int &choice) -> bool{
 }
 
 
-auto getChoice(int &choice) -> bool{
+template<typename T>
+auto getInput(T &choice) -> bool{
     cout << PROMPT << endl;
     cin >> choice;
-    if (cin.good() && checkInp(choice)) {
+    if (cin.good() && checkInput(choice)) {
         return true;
     }
     if (cin.eof()) {
@@ -30,7 +32,7 @@ auto getChoice(int &choice) -> bool{
     if (cin.bad()) {
         throw runtime_error("Got bad error");
     }
-    if (cin.fail() || !checkInp(choice)) {
+    if (cin.fail() || !checkInput(choice)) {
         cin.clear();
         cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         cerr << "Wrong input. Try again" << endl;
@@ -73,7 +75,7 @@ auto main() -> int {
     bool (*funcs[5])() = {finish, join, absolute, relative, relativize};
     try {
         int choice;
-        while (!getChoice(choice));
+        while (!getInput(choice));
         funcs[choice]();
     }
     catch (const std::exception &e) {
