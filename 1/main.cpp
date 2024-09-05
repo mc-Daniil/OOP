@@ -1,5 +1,7 @@
 #include <iostream>
 #include <limits>
+#include <type_traits>
+#include <algorithm>
 
 using std::cin;
 using std::cout;
@@ -9,13 +11,27 @@ using std::string;
 using std::runtime_error;
 #define PROMPT "Choose function: 1, 2, 3, 4:"
 
+#if defined(_WIN32) || defined(_WIN64)
+const char PATH_SEPARATOR = '\\';
+#elif defined(__APPLE__) || defined(__linux__)
+const char PATH_SEPARATOR = '/';
+#else
+#error "Unsupported operating system"
+#endif
+
 
 template<typename T>
-auto checkInput(T &choice) -> bool{
-    if (choice < 0 || choice > 4) {
-        return false;
+auto checkInput(const T &choice) -> bool{
+    if constexpr (std::is_integral<T>::value) {
+        return (choice <= 4 && choice >= 0);
     }
-    return true;
+    else if constexpr (std::is_same<T, string>::value) {
+        cout << "string" << endl;
+        return true;
+    }
+    else {
+        throw runtime_error("Unsupported type");
+    }
 }
 
 
@@ -41,38 +57,56 @@ auto getInput(T &choice) -> bool{
 }
 
 
-auto join() -> bool{
-    cout << 1 << endl;
-    return true;
+auto join() -> string{
+    return "";
 }
 
 
-auto absolute() -> bool{
+auto absolute() -> string{
     cout << 2 << endl;
-    return true;
+    return "";
 }
 
 
-auto relative() -> bool{
+auto relative() -> string{
     cout << 3 << endl;
-    return true;
+    return "";
 }
 
 
-auto relativize() -> bool{
+auto relativize() -> string{
     cout << 4 << endl;
-    return true;
+    return "";
 }
 
 
-auto finish() -> bool{
-    cout << 0 << endl;
-    return true;
+auto relativizeWrap() -> string{
+    return "";
+}
+
+
+auto relativeWrap() -> string{
+    return "";
+}
+
+
+auto absoluteWrap() -> string{
+    return "";
+}
+
+
+auto joinWrap() -> string{
+    return "";
+}
+
+
+auto finishWrap() -> string{
+    return "Goodbye";
 }
 
 
 auto main() -> int {
-    bool (*funcs[5])() = {finish, join, absolute, relative, relativize};
+    string (*funcs[5])() = {finishWrap, joinWrap, absoluteWrap, relativeWrap, relativizeWrap};
     try {
         int choice;
         while (!getInput(choice));
