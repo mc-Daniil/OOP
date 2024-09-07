@@ -9,7 +9,7 @@ using std::cerr;
 using std::endl;
 using std::string;
 using std::runtime_error;
-#define PROMPT "Choose function: 1, 2, 3, 4:"
+#define PROMPT "Enter:"
 
 #if defined(_WIN32) || defined(_WIN64)
 const char PATH_SEPARATOR = '\\';
@@ -20,26 +20,27 @@ const char PATH_SEPARATOR = '/';
 #endif
 
 
-template<typename T>
-auto checkInput(const T &choice) -> bool{
-    if constexpr (std::is_integral<T>::value) {
-        return (choice <= 4 && choice >= 0);
-    }
-    else if constexpr (std::is_same<T, string>::value) {
-        cout << "string" << endl;
-        return true;
-    }
-    else {
-        throw runtime_error("Unsupported type");
-    }
+bool checkInput(const int &input) {
+    return (4 >= input && input >= 0);
+}
+
+
+bool checkInput(const std::string &input) {
+    return true;
 }
 
 
 template<typename T>
-auto getInput(T &choice) -> bool{
+bool checkInput(const T &input) {
+    throw runtime_error("Unsupported type");
+}
+
+
+template<typename T>
+auto getInput(T &input) -> bool {
     cout << PROMPT << endl;
-    cin >> choice;
-    if (cin.good() && checkInput(choice)) {
+    cin >> input;
+    if (cin.good() && checkInput(input)) {
         return true;
     }
     if (cin.eof()) {
@@ -48,7 +49,7 @@ auto getInput(T &choice) -> bool{
     if (cin.bad()) {
         throw runtime_error("Got bad error");
     }
-    if (cin.fail() || !checkInput(choice)) {
+    if (cin.fail() || !checkInput(input)) {
         cin.clear();
         cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         cerr << "Wrong input. Try again" << endl;
@@ -57,60 +58,74 @@ auto getInput(T &choice) -> bool{
 }
 
 
-auto join() -> string{
-    return "";
+auto join(string &absolute, string &relative) -> string {
+    if (relative.empty() || relative[0] == PATH_SEPARATOR) {
+        throw std::invalid_argument("Not relative");
+    }
+
+    string result;
+    if (absolute.back() == PATH_SEPARATOR) {
+        result = absolute + relative;
+    } else {
+        result = absolute + PATH_SEPARATOR + relative;
+    }
+    return result;
 }
 
 
-auto absolute() -> string{
+auto absolute() -> string {
     cout << 2 << endl;
     return "";
 }
 
 
-auto relative() -> string{
+auto relative() -> string {
     cout << 3 << endl;
     return "";
 }
 
 
-auto relativize() -> string{
+auto relativize() -> string {
     cout << 4 << endl;
     return "";
 }
 
 
-auto relativizeWrap() -> string{
+auto relativizeWrap() -> string {
     return "";
 }
 
 
-auto relativeWrap() -> string{
+auto relativeWrap() -> string {
     return "";
 }
 
 
-auto absoluteWrap() -> string{
+auto absoluteWrap() -> string {
     return "";
 }
 
 
-auto joinWrap() -> string{
-    return "";
+auto joinWrap() -> string {
+    string absolute;
+    string relative;
+    getInput(absolute);
+    getInput(relative);
+    return join(absolute, relative);
 }
 
 
-auto finishWrap() -> string{
+auto finishWrap() -> string {
     return "Goodbye";
 }
 
 
 auto main() -> int {
-    string (*funcs[5])() = {finishWrap, joinWrap, absoluteWrap, relativeWrap, relativizeWrap};
+    string(*funcs[5])() = {finishWrap, joinWrap, absoluteWrap, relativeWrap, relativizeWrap};
     try {
         int choice;
         while (!getInput(choice));
-        funcs[choice]();
+        cout << funcs[choice]() << endl;
     }
     catch (const std::exception &e) {
         cerr << "Error:" << e.what() << endl;
