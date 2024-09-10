@@ -1,7 +1,7 @@
 #include <iostream>
 #include <limits>
-#include <type_traits>
 #include <algorithm>
+#include <filesystem>
 
 using std::cin;
 using std::cout;
@@ -9,6 +9,7 @@ using std::cerr;
 using std::endl;
 using std::string;
 using std::runtime_error;
+
 #define PROMPT "Enter:"
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -73,14 +74,15 @@ auto join(string &absolute, string &relative) -> string {
 }
 
 
-auto absolute() -> string {
-    cout << 2 << endl;
-    return "";
+auto absolute(string &relative) -> string {
+    std::filesystem::path p(relative);
+    return std::filesystem::absolute(p).string();
 }
 
 
-auto relative() -> string {
-    cout << 3 << endl;
+auto relative(const string& absolute) -> string {
+    std::filesystem::path current_dir = std::filesystem::current_path();
+
     return "";
 }
 
@@ -102,7 +104,9 @@ auto relativeWrap() -> string {
 
 
 auto absoluteWrap() -> string {
-    return "";
+    string relative;
+    getInput(relative);
+    return absolute(relative);
 }
 
 
