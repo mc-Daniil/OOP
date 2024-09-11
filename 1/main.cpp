@@ -27,7 +27,7 @@ bool checkInput(const int &input) {
 }
 
 
-bool checkInput(const std::string &input) {
+bool checkInput(const string &input) {
     return true;
 }
 
@@ -81,59 +81,74 @@ auto absolute(string &relative) -> string {
 }
 
 
-auto relative(const string& absolute) -> string {
-    string res;
-    if (!std::filesystem::path(absolute).is_absolute()) {
+auto relative(const std::string& absolute) -> string {
+    string res; // Результат работы
+
+    std::filesystem::path current_path = std::filesystem::current_path();
+    std::filesystem::path target(absolute);
+
+    if (target.is_relative()) {
         res = absolute;
     }
-    else {
-        std::filesystem::path current_dir = std::filesystem::current_path();
-        std::filesystem::path input_path = std::filesystem::absolute(absolute);
 
-        if (input_path.string().find(current_dir.string()) == 0) {
-            res = std::filesystem::relative(input_path, current_dir).string();
-        }
-        else {
-            std::vector<std::string> path_parts;
-            for (const auto& part : current_dir) {
-                path_parts.push_back(part.string());
+    // Проверка, является ли текущий каталог частью пути
+    if (target.string().find(current_path.string()) == 0) {
+        std::filesystem::path relative_path = std::filesystem::relative(target, current_path);
+        res = relative_path.string();
+    } else {
+        // Вычисляем количество переходов в родительский каталог
+        std::filesystem::path parent = current_path;
+        int parent_steps = 0;
+
+        while (parent != parent.root_path()) {
+            parent = parent.parent_path();
+            parent_steps++;
+            if (target.string().find(parent.string()) == 0) {
+                break;
             }
-
-            auto common_path_length = std::min(path_parts.size(), input_path.parent_path().native().size());
-            std::string relative_path;
-
-            for (size_t i = 0; i < path_parts.size() - common_path_length; ++i) {
-                relative_path += "..";
-                if (i < path_parts.size() - common_path_length - 1) {
-                    relative_path += "/";
-                }
-            }
-
-            relative_path += input_path.filename().string();
-
-            res = relative_path;
         }
+
+        std::string relative_path = std::string(parent_steps * 2, '.') + "\\";
+        std::filesystem::path target_relative = std::filesystem::relative(target, parent);
+        relative_path += target_relative.string();
+        res = relative_path;
     }
-    // Разобраться с условием
     return res;
 }
 
 
-auto relativize() -> string {
-    cout << 4 << endl;
-    return "";
+auto relativize(const string& base, const string& target) -> string{
+    std::filesystem::path base_path(base);
+    std::filesystem::path target_path(target);
+
+    // Оба ли абсолютные
+    if (!base_path.is_absolute() || !target_path.is_absolute()) {
+        throw std::invalid_argument("Both paths must be absolute.");
+    }
+
+    // Путь - подкаталог базового пути
+    if (target_path.string().find(base_path.string()) != 0) {
+        throw std::invalid_argument("Target path is not relative to the base path.");
+    }
+
+    // Вычисление относительного пути
+    std::filesystem::path relative_path = std::filesystem::relative(target_path, base_path);
+    return relative_path.string();
 }
 
 
 auto relativizeWrap() -> string {
-    return "";
+    string absolute1;
+    string absolute2;
+    getInput(absolute1);
+    getInput(absolute2);
+    return relativize(absolute1, absolute2);
 }
 
 
 auto relativeWrap() -> string {
     string absolute;
     getInput(absolute);
-    relative(absolute);
     return relative(absolute);
 }
 
