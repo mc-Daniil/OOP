@@ -2,6 +2,7 @@
 #include <limits>
 #include <algorithm>
 #include <filesystem>
+#include <vector>
 
 using std::cin;
 using std::cout;
@@ -81,9 +82,40 @@ auto absolute(string &relative) -> string {
 
 
 auto relative(const string& absolute) -> string {
-    std::filesystem::path current_dir = std::filesystem::current_path();
+    string res;
+    if (!std::filesystem::path(absolute).is_absolute()) {
+        res = absolute;
+    }
+    else {
+        std::filesystem::path current_dir = std::filesystem::current_path();
+        std::filesystem::path input_path = std::filesystem::absolute(absolute);
 
-    return "";
+        if (input_path.string().find(current_dir.string()) == 0) {
+            res = std::filesystem::relative(input_path, current_dir).string();
+        }
+        else {
+            std::vector<std::string> path_parts;
+            for (const auto& part : current_dir) {
+                path_parts.push_back(part.string());
+            }
+
+            auto common_path_length = std::min(path_parts.size(), input_path.parent_path().native().size());
+            std::string relative_path;
+
+            for (size_t i = 0; i < path_parts.size() - common_path_length; ++i) {
+                relative_path += "..";
+                if (i < path_parts.size() - common_path_length - 1) {
+                    relative_path += "/";
+                }
+            }
+
+            relative_path += input_path.filename().string();
+
+            res = relative_path;
+        }
+    }
+    // Разобраться с условием
+    return res;
 }
 
 
@@ -99,7 +131,10 @@ auto relativizeWrap() -> string {
 
 
 auto relativeWrap() -> string {
-    return "";
+    string absolute;
+    getInput(absolute);
+    relative(absolute);
+    return relative(absolute);
 }
 
 
