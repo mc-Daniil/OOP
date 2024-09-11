@@ -11,7 +11,8 @@ using std::endl;
 using std::string;
 using std::runtime_error;
 
-#define PROMPT "Enter:"
+#define PROMPT1 "Enter: 0 - exit\n1 - join\n2 - absolute\n3 - relative\n4 - relativize"
+#define PROMPT2 "Enter path: "
 
 #if defined(_WIN32) || defined(_WIN64)
 const char PATH_SEPARATOR = '\\';
@@ -39,8 +40,8 @@ bool checkInput(const T &input) {
 
 
 template<typename T>
-auto getInput(T &input) -> bool {
-    cout << PROMPT << endl;
+auto getInput(T &input, const string& prompt) -> bool {
+    cout << prompt << endl;
     cin >> input;
     if (cin.good() && checkInput(input)) {
         return true;
@@ -140,22 +141,22 @@ auto relativize(const string& base, const string& target) -> string{
 auto relativizeWrap() -> string {
     string absolute1;
     string absolute2;
-    getInput(absolute1);
-    getInput(absolute2);
+    getInput(absolute1, PROMPT2);
+    getInput(absolute2, PROMPT2);
     return relativize(absolute1, absolute2);
 }
 
 
 auto relativeWrap() -> string {
     string absolute;
-    getInput(absolute);
+    getInput(absolute, PROMPT2);
     return relative(absolute);
 }
 
 
 auto absoluteWrap() -> string {
     string relative;
-    getInput(relative);
+    getInput(relative, PROMPT2);
     return absolute(relative);
 }
 
@@ -163,8 +164,8 @@ auto absoluteWrap() -> string {
 auto joinWrap() -> string {
     string absolute;
     string relative;
-    getInput(absolute);
-    getInput(relative);
+    getInput(absolute, PROMPT2);
+    getInput(relative, PROMPT2);
     return join(absolute, relative);
 }
 
@@ -178,7 +179,7 @@ auto main() -> int {
     string(*funcs[5])() = {finishWrap, joinWrap, absoluteWrap, relativeWrap, relativizeWrap};
     try {
         int choice;
-        while (!getInput(choice));
+        while (!getInput(choice, PROMPT1));
         cout << funcs[choice]() << endl;
     }
     catch (const std::exception &e) {
