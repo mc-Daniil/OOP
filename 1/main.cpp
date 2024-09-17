@@ -2,7 +2,6 @@
 #include <limits>
 #include <algorithm>
 #include <filesystem>
-#include <vector>
 
 using std::cin;
 using std::cout;
@@ -29,6 +28,9 @@ bool checkInput(const int &input) {
 
 
 bool checkInput(const string &input) {
+    if (input.empty()) {
+        return false;
+    }
     return true;
 }
 
