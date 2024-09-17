@@ -1,29 +1,16 @@
-#include <iostream>
-using std::cin;
-using std::cout;
-using std::endl;
-using std::string;
-#define PROMPT "Выберите функцию: 1, 2, 3, 4"
-
-auto getChoice() -> int{
-    int choice;
-    cout << PROMPT << endl;
-    cin >> choice;
-    return choice;
-}
+#include "main.h"
 
 
-auto join(string absolute, string relative) -> int{
-    return 0;
-}
 
 
-auto main() -> int{
-    int choice(getChoice());
-    while (choice) {
-        cout << choice << endl;
-        choice = getChoice();
+auto main() -> int {
+    string(*funcs[5])() = {finishWrap, joinWrap, absoluteWrap, relativeWrap, relativizeWrap};
+    try {
+        int choice;
+        while (!getInput(choice, PROMPT1));
+        cout << funcs[choice]() << endl;
     }
-
-    return 0;
+    catch (const std::exception &e) {
+        cerr << "Error:" << e.what() << endl;
+    }
 }
