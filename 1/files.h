@@ -3,14 +3,32 @@
 
 #include "main.h"
 
+using std::string;
+
 auto join(string &absolute, string &relative) -> string;
+
 auto absolute(string &relative) -> string;
+
 auto relative(const std::string &absolute) -> string;
+
 auto relativize(const string &base, const string &target) -> string;
-auto relativizeWrap() -> string;
-auto relativeWrap() -> string;
-auto absoluteWrap() -> string;
-auto joinWrap() -> string;
+
+auto relativizeStringWrap() -> string;
+
+auto relativeStringWrap() -> string;
+
+auto absoluteStringWrap() -> string;
+
+auto joinStringWrap() -> string;
+
 auto finishWrap() -> string;
+
+auto relativizeCharWrap() -> string;
+
+auto relativeCharWrap() -> string;
+
+auto absoluteCharWrap() -> string;
+
+auto joinCharWrap() -> string;
 
 #endif //LAB1_FILES_H

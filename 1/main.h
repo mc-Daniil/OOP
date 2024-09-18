@@ -5,6 +5,8 @@
 #include <limits>
 #include <algorithm>
 #include <filesystem>
+#include "files.h"
+#include "input.h"
 
 using std::cin;
 using std::cout;
@@ -15,6 +17,7 @@ using std::runtime_error;
 
 #define PROMPT1 "Enter: 0 - exit\n1 - join\n2 - absolute\n3 - relative\n4 - relativize"
 #define PROMPT2 "Enter path: "
+#define PROMPT3 "Choose: 1 - char*\n2 - string"
 
 #if defined(_WIN32) || defined(_WIN64)
 const char PATH_SEPARATOR = '\\';
