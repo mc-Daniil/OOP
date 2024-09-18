@@ -2,6 +2,7 @@
 #define LAB1_INPUT_H
 
 #include "main.h"
+#include <cstring>
 
 using std::string;
 using std::cin;
@@ -18,6 +19,14 @@ auto checkChoice(const int &input) -> bool;
 
 auto checkPath(const string &input) -> bool;
 
+#include <iostream>
+#include <limits>
+#include <stdexcept>
+#include <string>
+#include <type_traits>
+
+using namespace std;
+
 template<typename T>
 auto getInput(T &input, const string &prompt) -> bool {
     cout << prompt << endl;
@@ -25,8 +34,10 @@ auto getInput(T &input, const string &prompt) -> bool {
     if constexpr (std::is_same_v<T, const char *>) {
         string temp;
         cin >> temp;
+
         if (cin.good()) {
-            input = temp.c_str(); // Присваиваем `const char *`
+            input = new char[temp.length() + 1];
+            strcpy(const_cast<char*>(input), temp.c_str());
             return true;
         }
     } else {
@@ -49,5 +60,6 @@ auto getInput(T &input, const string &prompt) -> bool {
     }
     return false;
 }
+
 
 #endif //LAB1_INPUT_H

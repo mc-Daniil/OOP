@@ -83,22 +83,22 @@ auto relativize(const string &base, const string &target) -> string {
 auto relativizeStringWrap() -> string {
     string absolute1;
     string absolute2;
-    getInput(absolute1, PROMPT2);
-    getInput(absolute2, PROMPT2);
+    while(!getInput(absolute1, F_ABS_PATH) || !checkPath(absolute1));
+    while(!getInput(absolute2, S_ABS_PATH) || !checkPath(absolute2));
     return relativize(absolute1, absolute2);
 }
 
 
 auto relativeStringWrap() -> string {
     string absolute;
-    getInput(absolute, PROMPT2);
+    while(!getInput(absolute, ABS_PATH) || !checkPath(absolute));
     return relative(absolute);
 }
 
 
 auto absoluteStringWrap() -> string {
     string relative;
-    getInput(relative, PROMPT2);
+    while(!getInput(relative, REL_PATH) || !checkPath(relative));
     return absolute(relative);
 }
 
@@ -106,8 +106,8 @@ auto absoluteStringWrap() -> string {
 auto joinStringWrap() -> string {
     string absolute;
     string relative;
-    getInput(absolute, PROMPT2);
-    getInput(relative, PROMPT2);
+    while(!getInput(absolute, ABS_PATH) || !checkPath(absolute));
+    while(!getInput(relative, REL_PATH) || !checkPath(relative));
     return join(absolute, relative);
 }
 
@@ -188,27 +188,27 @@ auto relativize(const char *base, const char *target) -> std::string {
 auto relativizeCharWrap() -> string {
     const char *absolute1;
     const char *absolute2;
-    getInput(absolute1, PROMPT2);
-    getInput(absolute2, PROMPT2);
+    while(!getInput(absolute1, F_ABS_PATH) || !checkPath(absolute1));
+    while(!getInput(absolute2, S_ABS_PATH) || !checkPath(absolute2));
     return relativize(absolute1, absolute2);
 }
 
 auto relativeCharWrap() -> string {
     const char *absolute;
-    getInput(absolute, PROMPT2);
+    while(!getInput(absolute, ABS_PATH) || !checkPath(absolute));
     return relative(absolute);
 }
 
 auto absoluteCharWrap() -> string {
     const char *relative;
-    getInput(relative, PROMPT2);
+    while(!getInput(relative, REL_PATH) || !checkPath(relative));
     return absolute(relative);
 }
 
 auto joinCharWrap() -> string {
     const char *absolute;
     const char *relative;
-    getInput(absolute, PROMPT2);
-    getInput(relative, PROMPT2);
+    while(!getInput(absolute, ABS_PATH) || !checkPath(absolute));
+    while(!getInput(relative, REL_PATH) || !checkPath(relative));
     return join(absolute, relative);
 }
