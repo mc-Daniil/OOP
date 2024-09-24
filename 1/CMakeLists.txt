@@ -13,7 +13,6 @@ target_link_libraries(main PRIVATE input files)
 
 target_compile_options(main PRIVATE -Wall -Wextra)
 
-# Для сборки из консоли:
 # mkdir build
 # cd build
 # cmake ..

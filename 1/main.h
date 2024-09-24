@@ -18,7 +18,6 @@ using std::runtime_error;
 #define CHOICE "Enter:\n0 - exit\n1 - join\n2 - absolute\n3 - relative\n4 - relativize"
 #define ABS_PATH "Enter absolute path: "
 #define REL_PATH "Enter relative path: "
-#define PATH "Enter path"
 #define F_ABS_PATH "Enter first absolute path: "
 #define S_ABS_PATH "Enter second absolute path: "
 #define STR_TYPE "Choose:\n0 - exit\n1 - char*\n2 - string"

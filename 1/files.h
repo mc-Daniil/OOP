@@ -5,9 +5,9 @@
 
 using std::string;
 
-auto join(string &absolute, string &relative) -> string;
+auto join(const string &absolute, const string &relative) -> string;
 
-auto absolute(string &relative) -> string;
+auto absolute(const string &relative) -> string;
 
 auto relative(const std::string &absolute) -> string;
 

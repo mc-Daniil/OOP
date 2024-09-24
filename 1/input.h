@@ -37,7 +37,7 @@ auto getInput(T &input, const string &prompt) -> bool {
 
         if (cin.good()) {
             input = new char[temp.length() + 1];
-            strcpy(const_cast<char*>(input), temp.c_str());
+            strcpy(const_cast<char *>(input), temp.c_str());
             return true;
         }
     } else {
