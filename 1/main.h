@@ -1,3 +1,10 @@
+/**
+ * \file
+ * \brief Main file
+ *
+ * This file gets input from user: string type, number of function and calls wrap function
+ */
+
 #ifndef LAB1_MAIN_H
 #define LAB1_MAIN_H
 
@@ -31,5 +38,11 @@ const char BAD_SEPARATOR = '\\';
 #else
 #error "Unsupported operating system"
 #endif
+
+/**
+ * Main func
+ * \return Returns return code
+ */
+auto main() -> int;
 
 #endif //LAB1_MAIN_H
