@@ -1,18 +1,7 @@
-/**
- * \file
- * \brief Main file
- *
- * This file gets input from user: string type, number of function and calls wrap function
- */
-
 #include "main.h"
 #include "files.h"
 #include "input.h"
 
-/**
- * Main func
- * \return Returns return code
- */
 auto main() -> int {
     string(*funcs[2][5])() = {{finishWrap, joinCharWrap,   absoluteCharWrap,   relativeCharWrap, relativizeCharWrap},
                               {finishWrap, joinStringWrap, absoluteStringWrap, relativeStringWrap,
