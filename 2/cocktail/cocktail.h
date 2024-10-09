@@ -58,7 +58,47 @@ namespace lab2 {
 
         // IO operators
         friend ostream &operator<<(ostream &out, const Cocktail &cocktail);
+
         friend istream &operator>>(istream &in, Cocktail &cocktail);
+    };
+
+
+    class CocktailTable {
+    private:
+        static const int MAX_COCKTAILS = 10;
+        Cocktail cocktails[MAX_COCKTAILS];
+        int numOfCocktails;
+
+    public:
+        // Constructors
+        explicit CocktailTable();
+
+        explicit CocktailTable(Cocktail *cocktailsArray, int n);
+
+        // Methods
+        [[nodiscard]] bool isEmpty() const;
+
+        [[nodiscard]] bool isFilled() const;
+
+        [[nodiscard]] bool isFull() const;
+
+        void removeCocktail(const string &name);
+
+        Cocktail getCocktail(int minAlcohol, int maxAlcohol);
+
+        [[nodiscard]] int totalVolume(int lowerBound, int upperBound) const;
+
+        void renameCocktail(const string &oldName, const string &newName);
+
+        // Overloads of operators
+        CocktailTable &operator+=(const Cocktail &cocktail);
+
+        Cocktail &operator[](const string &name);
+
+        // IO operators
+        friend ostream &operator<<(ostream &out, const CocktailTable &table);
+
+        friend istream &operator>>(istream &in, CocktailTable &table);
     };
 }
 
