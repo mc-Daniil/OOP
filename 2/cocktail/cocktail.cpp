@@ -148,7 +148,7 @@ namespace lab2 {
                 return;
             }
         }
-        std::cerr << "Cocktail not found.\n";
+        std::cerr << "Cocktail not found." << std::endl;
     }
 
     // IO operators
