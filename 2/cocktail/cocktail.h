@@ -14,7 +14,7 @@ using std::ostream;
 
 /**
  * @class Cocktail
- * @brief Class for one cocktail
+ * @brief Class for one cocktail.
  * Allows:
  * 1. Make cocktail
  * 2. Mix cocktails
@@ -43,48 +43,105 @@ public:
      */
     explicit Cocktail(string &n, int alcohol, int vol);
 
+    /**
+     * @brief Makes glass of water
+     * Gets only volume to make a glass of water
+     * @param vol - volume of water
+     */
     explicit Cocktail(int vol);
 
-    // Setters
+    /**
+     * @brief Sets cocktail name
+     * @param n - name of cocktail
+     */
     void setName(const string &n) {
         name = n;
     }
-
+    /**
+     * @brief Sets alcohol percentage
+     * @param alcohol - alcohol percentage
+     */
     void setAlcoholPercentage(int alcohol) {
         alcoholPercentage = alcohol;
     }
 
+    /**
+     * @brief Sets cocktail volume
+     * @param vol - volume
+     */
     void setVolume(int vol) {
         volume = vol;
     }
 
-    // Getters
+    /**
+     * @brief Gets name of cocktail
+     * @return Name of cocktail
+     */
     [[nodiscard]] string getName() const {
         return name;
     }
 
+    /**
+     * @brief Gets alcohol percentage of cocktail
+     * @return alcohol percentage
+     */
     [[nodiscard]] int getAlcoholPercentage() const {
         return alcoholPercentage;
     }
 
+    /**
+     * @brief Gets cocktail volume
+     * @return volume of cocktail
+     */
     [[nodiscard]] int getVolume() const {
         return volume;
     }
 
-    // Overloads of operators
+    /**
+     * @brief Mix cocktails
+     * Overload for + to mix 2 cocktails and make new cocktail
+     * @param other - second cocktail
+     * @return New mixed cocktail
+     */
     Cocktail operator+(const Cocktail &other) const;
-
+    /**
+     * @brief Put the cocktail over
+     * Put 100ml or less (if volume < 100 ml) to other cocktail
+     * @param other - destination cocktail
+     * @return This cocktail with less volume
+     */
     Cocktail &operator>>(Cocktail &other);
 
-    Cocktail operator*(int multiplier) const;
+    /**
+     * @brief Increase cocktail volume
+     * Increases cocktail volume n times user wants
+     * @param multiplier - on what increase
+     * @return This cocktail with new volume
+     */
+    Cocktail operator*(int multiplier);
 
-    // IO operators
+    /**
+     * @brief Print cocktail information
+     * @param out - out-stream
+     * @param cocktail - out cocktail
+     * @return out-stream
+     */
     friend ostream &operator<<(ostream &out, const Cocktail &cocktail);
-
+    /**
+     * @brief Input parameters for new cocktail
+     * @param in - in-stream
+     * @param cocktail - new cocktail
+     * @return in-stream
+     */
     friend istream &operator>>(istream &in, Cocktail &cocktail);
 };
 
-
+/**
+ * @class Cocktailtable
+ * @brief Class cocktail table.
+ * Allows:
+ *
+ */
 class CocktailTable {
 private:
     static const int MAX_COCKTAILS = 10;

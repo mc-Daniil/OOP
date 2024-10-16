@@ -14,16 +14,8 @@
 
 
 auto addNew() -> void {
-    std::string name = "Water";
-    int alcohol(0);
-    int volume(0);
-    while (!getInput(name, PROMPT_NAME));
-    if (name != "Water") {
-        while (!getInput(alcohol, PROMPT_ALCOHOL) || !checkAlcohol(alcohol));
-    }
-    while (!getInput(alcohol, PROMPT_VOLUME) || !checkVolume(volume));
-    Cocktail cock(name, alcohol, volume);
-    std::cout << cock;
+    Cocktail cock;
+    std::cin >> cock;
 }
 
 

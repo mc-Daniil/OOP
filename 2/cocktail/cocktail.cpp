@@ -27,22 +27,19 @@ Cocktail &Cocktail::operator>>(Cocktail &other) {
     return *this;
 }
 
-Cocktail Cocktail::operator*(int multiplier) const {
-    int newVolume = volume * multiplier;
-    string newName = name;
-    int newAlcoholPercentage = alcoholPercentage;
-    return Cocktail(newName, newAlcoholPercentage, newVolume);
+Cocktail Cocktail::operator*(int multiplier) {
+    volume *= multiplier;
+    return *this;
 }
 
 ostream &operator<<(ostream &out, const Cocktail &cocktail) {
-    out << "Cocktail: " << cocktail.name
-        << " | Alcohol: " << cocktail.alcoholPercentage << "%"
-        << " | Volume: " << cocktail.volume << "ml";
+    out << "Cocktail: " << cocktail.name << " | Alcohol: " << cocktail.alcoholPercentage << "%" << " | Volume: " << cocktail.volume << "ml";
     return out;
 }
 
 istream &operator>>(istream &in, Cocktail &cocktail) {
-    std::cout << "Enter name alcohol volume";
+    // TODO: check input
+    std::cout << "Enter name ('Water' or sth else) | alcohol | volume";
     in >> cocktail.name >> cocktail.alcoholPercentage >> cocktail.volume;
     return in;
 }
