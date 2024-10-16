@@ -6,7 +6,8 @@ Cocktail::Cocktail(string &n, int alcohol, int vol) : name(n), alcoholPercentage
 
 Cocktail::Cocktail(int vol) : name("Water"), alcoholPercentage(0), volume(vol) {}
 
-Cocktail Cocktail::operator+(const Cocktail &other) const {
+Cocktail Cocktail::operator+(const Cocktail &other) {
+    // TODO: Delete cocktails
     string newName = name + " + " + other.name;
     int totalVolume = volume + other.volume;
     int newAlcoholPercentage = (alcoholPercentage * volume + other.alcoholPercentage * other.volume) / totalVolume;
@@ -27,7 +28,7 @@ Cocktail &Cocktail::operator>>(Cocktail &other) {
     return *this;
 }
 
-Cocktail Cocktail::operator*(int multiplier) {
+Cocktail Cocktail::operator*(int &multiplier) {
     volume *= multiplier;
     return *this;
 }
@@ -48,6 +49,7 @@ istream &operator>>(istream &in, Cocktail &cocktail) {
 CocktailTable::CocktailTable() : numOfCocktails(0) {}
 
 CocktailTable::CocktailTable(Cocktail *cocktailsArray, int n) : numOfCocktails(n) {
+    // TODO: array?..
     for (int i = 0; i < n; ++i) {
         cocktails[i] = cocktailsArray[i];
     }

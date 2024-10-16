@@ -1,6 +1,6 @@
 /**
  * @file cocktail.h
- * File with classes of cocktail and cocktail table
+ * @brief File with classes of cocktail and cocktail table
  */
 #ifndef INC_2_COCKTAIL_H
 #define INC_2_COCKTAIL_H
@@ -103,7 +103,7 @@ public:
      * @param other - second cocktail
      * @return New mixed cocktail
      */
-    Cocktail operator+(const Cocktail &other) const;
+    Cocktail operator+(const Cocktail &other);
     /**
      * @brief Put the cocktail over
      * Put 100ml or less (if volume < 100 ml) to other cocktail
@@ -118,7 +118,7 @@ public:
      * @param multiplier - on what increase
      * @return This cocktail with new volume
      */
-    Cocktail operator*(int multiplier);
+    Cocktail operator*(int &multiplier);
 
     /**
      * @brief Print cocktail information
@@ -137,10 +137,16 @@ public:
 };
 
 /**
- * @class Cocktailtable
+ * @class CocktailTable
  * @brief Class cocktail table.
  * Allows:
- *
+ * 1. Make cocktail table
+ * 2. Add new cocktail
+ * 3. Get cocktail via name
+ * 4. Delete cocktail
+ * 5. Get 500 ml of cocktail with special percent of alcohol
+ * 6. Count cocktails with alcohol percentage
+ * 7. Rename cocktail
  */
 class CocktailTable {
 private:
@@ -149,34 +155,94 @@ private:
     int numOfCocktails;
 
 public:
-    // Constructors
+    /**
+     * @brief Empty constructor
+     * Makes empty table
+     */
     explicit CocktailTable();
 
+    /**
+     * @brief Makes table with n cocktails
+     * @param cocktailsArray
+     * @param n - number of cocktails
+     */
     explicit CocktailTable(Cocktail *cocktailsArray, int n);
 
-    // Methods
+    /**
+     * @brief Check if num of cocktails = 0
+     * @return true if number of cocktails = 0
+     */
     [[nodiscard]] bool isEmpty() const;
 
+    /**
+     * @brief Check if table is not full and not empty
+     * @return true if not full and not empty
+     */
     [[nodiscard]] bool isFilled() const;
 
+    /**
+     * @brief Check if table is full
+     * @return true if table is full
+     */
     [[nodiscard]] bool isFull() const;
 
+    /**
+     * @brief Remove cocktail from table via name
+     * @param name - name of cocktail to remove
+     */
     void removeCocktail(const string &name);
 
+    /**
+     * @brief Get cocktail with specific % of alcohol
+     * @param minAlcohol - lower bound of alcohol percentage
+     * @param maxAlcohol - upper bound of alcohol percentage
+     * @return cocktail with specific alcohol percentage
+     */
     Cocktail getCocktail(int minAlcohol, int maxAlcohol);
 
+    /**
+     * @brief Get total volume of cocktail with specific alcohol percentage
+     * @param lowerBound - lower bound of alcohol percentage
+     * @param upperBound - upper bound of alcohol percentage
+     * @return total volume of cocktails with specific alcohol percentage
+     */
     [[nodiscard]] int totalVolume(int lowerBound, int upperBound) const;
 
+    /**
+     * @brief Rename cocktail
+     * @param oldName - old name of cocktail
+     * @param newName - new name of cocktail
+     */
     void renameCocktail(const string &oldName, const string &newName);
 
-    // Overloads of operators
+    /**
+     * @brief Add new cocktail in table
+     * @param cocktail - cocktail to add
+     * @return cocktail table
+     */
     CocktailTable &operator+=(const Cocktail &cocktail);
 
+    /**
+     * @brief Get cocktail via name
+     * @param name - name of cocktail to get
+     * @return cocktail user needs
+     */
     Cocktail &operator[](const string &name);
 
-    // IO operators
+    /**
+     * @brief Print cocktail table
+     * @param out - out-stream
+     * @param table - table to print
+     * @return out-stream
+     */
     friend ostream &operator<<(ostream &out, const CocktailTable &table);
 
+    /**
+     * @brief Input num of cocktails, cocktails and add them in table
+     * @param in - in-stream
+     * @param table - table where to add
+     * @return in-stream
+     */
     friend istream &operator>>(istream &in, CocktailTable &table);
 };
 
