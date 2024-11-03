@@ -5,8 +5,13 @@
 #ifndef INC_2_COCKTAIL_H
 #define INC_2_COCKTAIL_H
 
+#define PROMPT_NAME "Enter name of cocktail ('Water' if you want water):\n>> "
+#define PROMPT_ALCOHOL "Enter alcohol % of cocktail:\n>> "
+#define PROMPT_VOLUME "Enter volume of cocktail:\n>> "
+
 #include <iostream>
 #include <string>
+#include "../io/io.h"
 
 using std::string;
 using std::istream;
@@ -30,7 +35,6 @@ private:
 public:
     /**
      * @brief Empty constructor
-     * Makes empty cocktail
      */
     explicit Cocktail();
 
@@ -55,8 +59,9 @@ public:
      * @param n - name of cocktail
      */
     void setName(const string &n) {
-        name = n;
+       name = n;
     }
+
     /**
      * @brief Sets alcohol percentage
      * @param alcohol - alcohol percentage
@@ -104,6 +109,7 @@ public:
      * @return New mixed cocktail
      */
     Cocktail operator+(const Cocktail &other);
+
     /**
      * @brief Put the cocktail over
      * Put 100ml or less (if volume < 100 ml) to other cocktail
@@ -127,6 +133,7 @@ public:
      * @return out-stream
      */
     friend ostream &operator<<(ostream &out, const Cocktail &cocktail);
+
     /**
      * @brief Input parameters for new cocktail
      * @param in - in-stream
@@ -135,6 +142,32 @@ public:
      */
     friend istream &operator>>(istream &in, Cocktail &cocktail);
 };
+
+
+class Node {
+public:
+    Cocktail *cocktail;
+    Node *next;
+
+    explicit Node(Cocktail *cock);
+};
+
+
+class HashTable {
+private:
+    Node **table;
+    int capacity;
+    int size;
+
+    [[nodiscard]] int hash(const string &name) const;
+public:
+    explicit HashTable(int cap = 10);
+    void insert(Cocktail *cock);
+    void remove(const string &name);
+    Cocktail *get(const string &name);
+    ~HashTable();
+};
+
 
 /**
  * @class CocktailTable
@@ -152,7 +185,7 @@ class CocktailTable {
 private:
     static const int MAX_COCKTAILS = 10;
     Cocktail cocktails[MAX_COCKTAILS];
-    int numOfCocktails;
+    int numOfCocktails = 0;
 
 public:
     /**
@@ -166,7 +199,7 @@ public:
      * @param cocktailsArray
      * @param n - number of cocktails
      */
-    explicit CocktailTable(Cocktail *cocktailsArray, int n);
+    explicit CocktailTable(Cocktail cocktailsArray[], int n);
 
     /**
      * @brief Check if num of cocktails = 0

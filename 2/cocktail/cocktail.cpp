@@ -34,25 +34,106 @@ Cocktail Cocktail::operator*(int &multiplier) {
 }
 
 ostream &operator<<(ostream &out, const Cocktail &cocktail) {
-    out << "Cocktail: " << cocktail.name << " | Alcohol: " << cocktail.alcoholPercentage << "%" << " | Volume: " << cocktail.volume << "ml";
+    out << "Cocktail: " << cocktail.name << " | Alcohol: " << cocktail.alcoholPercentage << "%" << " | Volume: "
+        << cocktail.volume << "ml";
     return out;
 }
 
 istream &operator>>(istream &in, Cocktail &cocktail) {
-    // TODO: check input
-    std::cout << "Enter name ('Water' or sth else) | alcohol | volume";
-    in >> cocktail.name >> cocktail.alcoholPercentage >> cocktail.volume;
+    std::string n;
+    int alcohol = 0;
+    int volume = 0;
+    while (!getInput(n, PROMPT_NAME));
+    while (!getInput(alcohol, PROMPT_ALCOHOL) || !checkAlcohol(alcohol));
+    while (!getInput(volume, PROMPT_VOLUME) || !checkVolume(volume));
+    cocktail.setName(n);
+    cocktail.setAlcoholPercentage(alcohol);
+    cocktail.setVolume(volume);
     return in;
 }
 
-//Cocktailtable
+Node::Node(Cocktail *cock) : cocktail(cock), next(nullptr) {}
+
+HashTable::HashTable(int cap) : capacity(cap), size(0) {
+    table = new Node *[capacity];
+    for (int i = 0; i < capacity; ++i) {
+        table[i] = nullptr;
+    }
+}
+
+int HashTable::hash(const std::string &name) const {
+    int res(0);
+    for (char c: name) {
+        res += (res * 52 + res) % capacity;
+    }
+    return res;
+}
+
+
+void HashTable::insert(Cocktail *cock) {
+    int ind(hash(cock->getName()));
+    Node *newNode = new Node(cock);
+
+    newNode->next = table[ind];
+    table[ind] = newNode;
+    ++size;
+}
+
+
+void HashTable::remove(const std::string &name) {
+    int ind(hash(name));
+    Node *current = table[ind];
+    Node *previous = nullptr;
+
+    while (current && current->cocktail->getName() != name) {
+        previous = current;
+        current = current->next;
+    }
+
+    if (current) {
+        if (previous) {
+            previous->next = current->next;
+        } else {
+            table[ind] = current->next;
+        }
+        delete current->cocktail;
+        delete current;
+        --size;
+    }
+}
+
+
+Cocktail *HashTable::get(const std::string &name) {
+    int ind(hash(name));
+    Node *current = table[ind];
+
+    while (current) {
+        if (current->cocktail->getName() == name) {
+            return current->cocktail;
+        }
+        current = current->next;
+    }
+    return nullptr;
+}
+
+HashTable::~HashTable() {
+    for (int i = 0; i < capacity; ++i) {
+        Node *current = table[i];
+        while (current) {
+            Node *temp = current;
+            current = current->next;
+            delete temp->cocktail;
+            delete temp;
+        }
+    }
+    delete[]table;
+}
+
+
 CocktailTable::CocktailTable() : numOfCocktails(0) {}
 
-CocktailTable::CocktailTable(Cocktail *cocktailsArray, int n) : numOfCocktails(n) {
-    // TODO: array?..
-    for (int i = 0; i < n; ++i) {
-        cocktails[i] = cocktailsArray[i];
-    }
+CocktailTable::CocktailTable(Cocktail cocktailsArray[], int n) : numOfCocktails(n) {
+    std::copy(cocktailsArray, cocktailsArray + n, cocktails);
 }
 
 bool CocktailTable::isEmpty() const {
@@ -68,6 +149,7 @@ bool CocktailTable::isFull() const {
 }
 
 CocktailTable &CocktailTable::operator+=(const Cocktail &cocktail) {
+    // TODO: Check if already in table
     if (!isFull()) {
         cocktails[numOfCocktails++] = cocktail;
     } else {
