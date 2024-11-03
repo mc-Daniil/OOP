@@ -1,3 +1,4 @@
+// ЭТО ЕЩЁ НЕ РАБОЧАЯ ВЕРСИЯ. Если рабочая версия не будет на гите, пишите @danissimurr
 /**
  * @file cocktail.h
  * @brief File with classes of cocktail and cocktail table
@@ -59,7 +60,7 @@ public:
      * @param n - name of cocktail
      */
     void setName(const string &n) {
-       name = n;
+        name = n;
     }
 
     /**
@@ -160,11 +161,20 @@ private:
     int size;
 
     [[nodiscard]] int hash(const string &name) const;
+
 public:
     explicit HashTable(int cap = 10);
+
     void insert(Cocktail *cock);
+
     void remove(const string &name);
+
     Cocktail *get(const string &name);
+
+    [[nodiscard]] int getCapacity() const;
+
+    [[nodiscard]] Node *getElem(int ind) const;
+
     ~HashTable();
 };
 
@@ -183,23 +193,26 @@ public:
  */
 class CocktailTable {
 private:
-    static const int MAX_COCKTAILS = 10;
-    Cocktail cocktails[MAX_COCKTAILS];
-    int numOfCocktails = 0;
+    HashTable cocktails;
 
 public:
     /**
      * @brief Empty constructor
-     * Makes empty table
      */
-    explicit CocktailTable();
+    CocktailTable() = default;
 
     /**
-     * @brief Makes table with n cocktails
-     * @param cocktailsArray
+     * @brief Makes table with n cocktails from array
+     * @param cocktailsArray - array of cocktails
      * @param n - number of cocktails
      */
     explicit CocktailTable(Cocktail cocktailsArray[], int n);
+
+    CocktailTable(const CocktailTable &other);
+
+    CocktailTable(CocktailTable &&other) noexcept;
+
+    CocktailTable &operator=(const CocktailTable &other);
 
     /**
      * @brief Check if num of cocktails = 0
@@ -225,6 +238,8 @@ public:
      */
     void removeCocktail(const string &name);
 
+    Node *getElemViaIndex(int ind) const;
+
     /**
      * @brief Get cocktail with specific % of alcohol
      * @param minAlcohol - lower bound of alcohol percentage
@@ -232,6 +247,8 @@ public:
      * @return cocktail with specific alcohol percentage
      */
     Cocktail getCocktail(int minAlcohol, int maxAlcohol);
+
+    int getCapacity();
 
     /**
      * @brief Get total volume of cocktail with specific alcohol percentage

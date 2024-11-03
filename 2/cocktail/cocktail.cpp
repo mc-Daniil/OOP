@@ -116,6 +116,15 @@ Cocktail *HashTable::get(const std::string &name) {
     return nullptr;
 }
 
+int HashTable::getCapacity() const {
+    return capacity;
+}
+
+Node *HashTable::getElem(int ind) const {
+    return table[ind];
+}
+
+
 HashTable::~HashTable() {
     for (int i = 0; i < capacity; ++i) {
         Node *current = table[i];
@@ -130,10 +139,46 @@ HashTable::~HashTable() {
 }
 
 
-CocktailTable::CocktailTable() : numOfCocktails(0) {}
+CocktailTable::CocktailTable(Cocktail cocktailsArray[], int n) {
+    for (int i = 0; i < n; ++i) {
+        cocktails += cocktailsArray[i];
+    }
+}
 
-CocktailTable::CocktailTable(Cocktail cocktailsArray[], int n) : numOfCocktails(n) {
-    std::copy(cocktailsArray, cocktailsArray + n, cocktails);
+
+CocktailTable::CocktailTable(const CocktailTable &other) {
+    for (int i = 0; i < other.cocktails.getCapacity(); ++i) {
+        Node *nd = other.getElemViaIndex(i);
+        while (nd) {
+            cocktails += *nd->next;
+        }
+    }
+}
+
+
+CocktailTable::CocktailTable(CocktailTable &&other) noexcept: cocktails(std::move(other.cocktails)) {}
+
+
+CocktailTable &CocktailTable::operator=(const CocktailTable &other) {
+    if (this != &other) {
+        // TODO: clearTable();
+    }
+
+    for (int i = 0; i < other.cocktails.getCapacity(); ++i) {
+        Node *nd = other.cocktails.getElem(i);
+        while (nd) {
+            cocktails += *nd->cocktail;
+        }
+    }
+    return *this;
+}
+
+
+
+
+
+int CocktailTable::getCapacity() {
+    return cocktails.getCapacity();
 }
 
 bool CocktailTable::isEmpty() const {
@@ -178,6 +223,11 @@ void CocktailTable::removeCocktail(const string &name) {
         }
     }
     throw std::out_of_range("Cocktail not found");
+}
+
+
+Node *CocktailTable::getElemViaIndex(int ind) const {
+    return cocktails.getElem(ind);
 }
 
 Cocktail CocktailTable::getCocktail(int minAlcohol, int maxAlcohol) {
