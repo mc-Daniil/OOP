@@ -1,4 +1,4 @@
-// ЭТО ЕЩЁ НЕ РАБОЧАЯ ВЕРСИЯ. Если рабочая версия не будет на гите, пишите @danissimurr
+// ЭТО ЕЩЁ НЕ РАБОЧАЯ ВЕРСИЯ. Если рабочая версия не будет на гите, пишите в тг @danissimurr
 /**
  * @file cocktail.h
  * @brief File with classes of cocktail and cocktail table
