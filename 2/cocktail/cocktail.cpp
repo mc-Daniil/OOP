@@ -62,9 +62,9 @@ HashTable::HashTable(int cap) : capacity(cap), size(0) {
 }
 
 int HashTable::hash(const std::string &name) const {
-    int res(0);
-    for (char c: name) {
-        res += (res * 52 + res) % capacity;
+    int res = 0;
+    for (char c : name) {
+        res = (res * 31 + c) % capacity;
     }
     return res;
 }
@@ -103,6 +103,21 @@ void HashTable::remove(const std::string &name) {
 }
 
 
+void HashTable::clearTable() {
+    for (int i = 0; i < capacity; ++i) {
+        Node *current = table[i];
+        while (current) {
+            Node *temp = current;
+            current = current->next;
+            delete temp->cocktail;
+            delete temp;
+        }
+        table[i] = nullptr;
+    }
+    size = 0;
+}
+
+
 Cocktail *HashTable::get(const std::string &name) {
     int ind(hash(name));
     Node *current = table[ind];
@@ -126,15 +141,7 @@ Node *HashTable::getElem(int ind) const {
 
 
 HashTable::~HashTable() {
-    for (int i = 0; i < capacity; ++i) {
-        Node *current = table[i];
-        while (current) {
-            Node *temp = current;
-            current = current->next;
-            delete temp->cocktail;
-            delete temp;
-        }
-    }
+    clearTable();
     delete[]table;
 }
 
@@ -161,7 +168,7 @@ CocktailTable::CocktailTable(CocktailTable &&other) noexcept: cocktails(std::mov
 
 CocktailTable &CocktailTable::operator=(const CocktailTable &other) {
     if (this != &other) {
-        // TODO: clearTable();
+
     }
 
     for (int i = 0; i < other.cocktails.getCapacity(); ++i) {
@@ -174,7 +181,13 @@ CocktailTable &CocktailTable::operator=(const CocktailTable &other) {
 }
 
 
-
+CocktailTable &CocktailTable::operator=(CocktailTable &&other) noexcept {
+    if (this != &other) {
+        cocktails.clearTable();
+        cocktails = std::move(other.cocktails);
+    }
+    return *this;
+}
 
 
 int CocktailTable::getCapacity() {
@@ -194,35 +207,21 @@ bool CocktailTable::isFull() const {
 }
 
 CocktailTable &CocktailTable::operator+=(const Cocktail &cocktail) {
-    // TODO: Check if already in table
-    if (!isFull()) {
-        cocktails[numOfCocktails++] = cocktail;
-    } else {
-        std::cerr << "Table is full, cannot add more cocktails.\n";
-    }
+    auto *newCock = new Cocktail(cocktail);
+    cocktails.insert(newCock);
     return *this;
 }
 
 Cocktail &CocktailTable::operator[](const string &name) {
-    for (int i = 0; i < numOfCocktails; ++i) {
-        if (cocktails[i].getName() == name) {
-            return cocktails[i];
-        }
+    Cocktail *cock = cocktails.get(name);
+    if (!cock) {
+        throw std::runtime_error("Cocktail not found!");
     }
-    throw std::out_of_range("Cocktail not found");
+    return *cock;
 }
 
 void CocktailTable::removeCocktail(const string &name) {
-    for (int i = 0; i < numOfCocktails; ++i) {
-        if (cocktails[i].getName() == name) {
-            for (int j = i; j < numOfCocktails - 1; ++j) {
-                cocktails[j] = cocktails[j + 1];
-            }
-            --numOfCocktails;
-            return;
-        }
-    }
-    throw std::out_of_range("Cocktail not found");
+    cocktails.remove(name);
 }
 
 
@@ -283,19 +282,27 @@ void CocktailTable::renameCocktail(const string &oldName, const string &newName)
 
 // IO operators
 ostream &operator<<(ostream &out, const CocktailTable &table) {
-    out << "Cocktail Table: " << table.numOfCocktails << " cocktails" << std::endl;
-    for (int i = 0; i < table.numOfCocktails; ++i) {
-        out << table.cocktails[i] << std::endl;
+    for (int i = 0; i < table.cocktails.getCapacity(); ++i) {
+        Node* node = table.getElemViaIndex(i);
+        while (node) {
+            out << "Name: " << node->cocktail->getName()
+                << ", Alcohol: " << node->cocktail->getAlcoholPercentage()
+                << "%, Volume: " << node->cocktail->getVolume() << " ml\n";
+            node = node->next;
+        }
     }
     return out;
 }
 
+
 istream &operator>>(istream &in, CocktailTable &table) {
     std::cout << "Enter number of cocktails: ";
-    in >> table.numOfCocktails;
-    for (int i = 0; i < table.numOfCocktails; ++i) {
-        std::cout << "Enter details for cocktail " << i + 1 << ":" << std::endl;
-        in >> table.cocktails[i];
+    int count;
+    in >> count;
+    for (int i = 0; i < count; ++i) {
+        Cocktail cocktail;
+        in >> cocktail;
+        table += cocktail;
     }
     return in;
 }

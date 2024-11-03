@@ -6,10 +6,6 @@
 #ifndef INC_2_COCKTAIL_H
 #define INC_2_COCKTAIL_H
 
-#define PROMPT_NAME "Enter name of cocktail ('Water' if you want water):\n>> "
-#define PROMPT_ALCOHOL "Enter alcohol % of cocktail:\n>> "
-#define PROMPT_VOLUME "Enter volume of cocktail:\n>> "
-
 #include <iostream>
 #include <string>
 #include "../io/io.h"
@@ -169,6 +165,8 @@ public:
 
     void remove(const string &name);
 
+    void clearTable();
+
     Cocktail *get(const string &name);
 
     [[nodiscard]] int getCapacity() const;
@@ -213,6 +211,10 @@ public:
     CocktailTable(CocktailTable &&other) noexcept;
 
     CocktailTable &operator=(const CocktailTable &other);
+
+    CocktailTable &operator=(CocktailTable &&other) noexcept;
+
+    ~CocktailTable() = default;
 
     /**
      * @brief Check if num of cocktails = 0

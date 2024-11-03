@@ -2,14 +2,14 @@
 #include "io/io.h"
 #include "cocktail/cocktail.h"
 
-#define PROMPT "Choose:\n\t0 - exit\n\t1 - add new cocktail\n\t2 - view cocktail\n\t3 - view table status\n\t4 - delete cocktail\n\t5 - get 500 ml of cocktail\n\t6 - get number of cocktails with %\n\t7 - rename cocktail\n>> "
-#define PROMPT_NAME "Enter name of cocktail ('Water' if you want water):\n>> "
-#define PROMPT_OLD_NAME "Enter old name of cocktail ('Water' if you want water):\n>> "
-#define PROMPT_NEW_NAME "Enter new name of cocktail ('Water' if you want water):\n>> "
-#define PROMPT_ALCOHOL "Enter alcohol % of cocktail:\n>> "
-#define PROMPT_MIN_ALCOHOL "Enter minimum alcohol % of cocktail:\n>> "
-#define PROMPT_MAX_ALCOHOL "Enter maximum alcohol % of cocktail:\n>> "
-#define PROMPT_VOLUME "Enter volume of cocktail:\n>> "
+const std::string PROMPT("Choose:\n\t0 - exit\n\t1 - add new cocktail\n\t2 - view cocktail\n\t3 - view table status\n\t4 - delete cocktail\n\t5 - get 500 ml of cocktail\n\t6 - get number of cocktails with %\n\t7 - rename cocktail\n>> ");
+const std::string PROMPT_NAME("Enter name of cocktail ('Water' if you want water):\n>> ");
+const std::string PROMPT_OLD_NAME("Enter old name of cocktail ('Water' if you want water):\n>> ");
+const std::string PROMPT_NEW_NAME("Enter new name of cocktail ('Water' if you want water):\n>> ");
+const std::string PROMPT_ALCOHOL("Enter alcohol % of cocktail:\n>> ");
+const std::string PROMPT_MIN_ALCOHOL("Enter minimum alcohol % of cocktail:\n>> ");
+const std::string PROMPT_MAX_ALCOHOL("Enter maximum alcohol % of cocktail:\n>> ");
+const std::string PROMPT_VOLUME("Enter volume of cocktail:\n>> ");
 
 
 void renameCock(CocktailTable &table) {
