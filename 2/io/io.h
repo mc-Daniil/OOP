@@ -57,4 +57,6 @@ auto checkAlcohol(int &alcohol) -> bool;
  */
 auto checkVolume(int &volume) -> bool;
 
+auto checkN(int &n) -> bool;
+
 #endif //LAB2_IO_H

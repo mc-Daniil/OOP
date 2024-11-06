@@ -1,13 +1,15 @@
 #include "cocktail.h"
 
+#include <utility>
+#include "../main.h"
+
 Cocktail::Cocktail() : name(), alcoholPercentage(0), volume(0) {}
 
-Cocktail::Cocktail(string &n, int alcohol, int vol) : name(n), alcoholPercentage(alcohol), volume(vol) {}
+Cocktail::Cocktail(string n, int alcohol, int vol) : name(std::move(n)), alcoholPercentage(alcohol), volume(vol) {}
 
 Cocktail::Cocktail(int vol) : name("Water"), alcoholPercentage(0), volume(vol) {}
 
 Cocktail Cocktail::operator+(const Cocktail &other) {
-    // TODO: Delete cocktails
     string newName = name + " + " + other.name;
     int totalVolume = volume + other.volume;
     int newAlcoholPercentage = (alcoholPercentage * volume + other.alcoholPercentage * other.volume) / totalVolume;
@@ -28,7 +30,7 @@ Cocktail &Cocktail::operator>>(Cocktail &other) {
     return *this;
 }
 
-Cocktail Cocktail::operator*(int &multiplier) {
+Cocktail Cocktail::operator*(int multiplier) {
     volume *= multiplier;
     return *this;
 }
@@ -63,7 +65,7 @@ HashTable::HashTable(int cap) : capacity(cap), size(0) {
 
 int HashTable::hash(const std::string &name) const {
     int res = 0;
-    for (char c : name) {
+    for (char c: name) {
         res = (res * 31 + c) % capacity;
     }
     return res;
@@ -135,6 +137,10 @@ int HashTable::getCapacity() const {
     return capacity;
 }
 
+int HashTable::getSize() const {
+    return size;
+}
+
 Node *HashTable::getElem(int ind) const {
     return table[ind];
 }
@@ -146,35 +152,41 @@ HashTable::~HashTable() {
 }
 
 
-CocktailTable::CocktailTable(Cocktail cocktailsArray[], int n) {
+CocktailTable::CocktailTable(Cocktail *cocktailsArray[], int n) {
     for (int i = 0; i < n; ++i) {
-        cocktails += cocktailsArray[i];
+        cocktails.insert(cocktailsArray[i]);
     }
 }
 
 
 CocktailTable::CocktailTable(const CocktailTable &other) {
     for (int i = 0; i < other.cocktails.getCapacity(); ++i) {
-        Node *nd = other.getElemViaIndex(i);
-        while (nd) {
-            cocktails += *nd->next;
+        Node *node = other.getElemViaIndex(i);
+        while (node) {
+            auto *newCocktail = new Cocktail(*node->cocktail);
+            cocktails.insert(newCocktail);
+            node = node->next;
         }
     }
 }
 
 
-CocktailTable::CocktailTable(CocktailTable &&other) noexcept: cocktails(std::move(other.cocktails)) {}
+CocktailTable::CocktailTable(CocktailTable &&other) noexcept {
+    cocktails = std::move(other.cocktails);
+}
 
 
 CocktailTable &CocktailTable::operator=(const CocktailTable &other) {
     if (this != &other) {
+        cocktails.clearTable();
 
-    }
-
-    for (int i = 0; i < other.cocktails.getCapacity(); ++i) {
-        Node *nd = other.cocktails.getElem(i);
-        while (nd) {
-            cocktails += *nd->cocktail;
+        for (int i = 0; i < other.cocktails.getCapacity(); ++i) {
+            Node *node = other.cocktails.getElem(i);
+            while (node) {
+                auto *newCocktail = new Cocktail(*node->cocktail);
+                cocktails.insert(newCocktail);
+                node = node->next;
+            }
         }
     }
     return *this;
@@ -194,16 +206,20 @@ int CocktailTable::getCapacity() {
     return cocktails.getCapacity();
 }
 
+int CocktailTable::getSize() {
+    return cocktails.getSize();
+}
+
 bool CocktailTable::isEmpty() const {
-    return numOfCocktails == 0;
+    return cocktails.getSize() == 0;
 }
 
 bool CocktailTable::isFilled() const {
-    return numOfCocktails > 0 && numOfCocktails < MAX_COCKTAILS;
+    return cocktails.getSize() > 0 && cocktails.getSize() < cocktails.getCapacity();
 }
 
 bool CocktailTable::isFull() const {
-    return numOfCocktails == MAX_COCKTAILS;
+    return cocktails.getSize() == cocktails.getCapacity();
 }
 
 CocktailTable &CocktailTable::operator+=(const Cocktail &cocktail) {
@@ -230,60 +246,92 @@ Node *CocktailTable::getElemViaIndex(int ind) const {
 }
 
 Cocktail CocktailTable::getCocktail(int minAlcohol, int maxAlcohol) {
-    Cocktail result((string &) "Mixed", 0, 0);
+    Cocktail resultCock((string &) "Mixed", 0, 0);
     int totalVolume = 0;
 
-    for (int i = 0; i < numOfCocktails; i++) {
-        Cocktail currentCock = cocktails[i];
-        int alcoholPerc = currentCock.getAlcoholPercentage();
-        if (alcoholPerc >= minAlcohol && alcoholPerc <= maxAlcohol) {
-            if (currentCock.getVolume() >= 500) {
-                string newName = currentCock.getName();
-                int newAlcohol = currentCock.getAlcoholPercentage();
-                int newVolume = 500;
-                currentCock.setVolume(currentCock.getVolume() - 500);
-                return Cocktail(newName, newAlcohol, newVolume);
+    for (int i = 0; i < cocktails.getCapacity(); ++i) {
+        Node *current = cocktails.getElem(i);
+
+        while (current) {
+            Cocktail *currentCock = current->cocktail;
+            int alcohol = currentCock->getAlcoholPercentage();
+
+            if (alcohol >= minAlcohol && alcohol <= maxAlcohol) {
+                if (currentCock->getVolume() >= 500) {
+                    string newName = currentCock->getName();
+                    int newAlcohol = currentCock->getAlcoholPercentage();
+                    int newVolume = 500;
+                    currentCock->setVolume(currentCock->getVolume() - 500);
+                    if (currentCock->getVolume() == 0) {
+                        cocktails.remove(currentCock->getName());
+                    }
+                    return Cocktail(newName, newAlcohol, newVolume);
+                }
             }
-        }
 
-        result = result + currentCock;
-        totalVolume += currentCock.getVolume();
+            resultCock = resultCock + *currentCock;
+            totalVolume += currentCock->getVolume();
 
-        if (totalVolume >= 500) {
-            result.setVolume(500);
-            return result;
+            auto *res = new Cocktail;
+            res->setName(resultCock.getName());
+            res->setAlcoholPercentage(resultCock.getAlcoholPercentage());
+            res->setVolume(resultCock.getVolume());
+            cocktails.insert(res);
+
+            if (totalVolume >= 500) {
+                res->setVolume(res->getVolume() - 500);
+                Cocktail ret;
+                ret.setName(res->getName());
+                ret.setAlcoholPercentage(res->getAlcoholPercentage());
+                ret.setVolume(500);
+                if (res->getVolume() == 0) {
+                    cocktails.remove(res->getName());
+                }
+                return ret;
+            }
+
+            current = current->next;
         }
     }
+
     throw std::out_of_range("Cocktail not found");
 }
 
 int CocktailTable::totalVolume(int lowerBound, int upperBound) const {
     int totalVolume = 0;
-    for (int i = 0; i < numOfCocktails; ++i) {
-        Cocktail currentCock = cocktails[i];
-        int alcoholPerc = currentCock.getAlcoholPercentage();
-        if (alcoholPerc >= lowerBound && alcoholPerc < upperBound) {
-            totalVolume += currentCock.getVolume();
+
+    for (int i = 0; i < cocktails.getCapacity(); ++i) {
+        Node *current = cocktails.getElem(i);
+
+        while (current) {
+            Cocktail *currentCock = current->cocktail;
+            int alcohol = currentCock->getAlcoholPercentage();
+
+            if (alcohol >= lowerBound && alcohol <= upperBound) {
+                totalVolume += currentCock->getVolume();
+            }
+
+            current = current->next;
         }
     }
+
     return totalVolume;
 }
 
 void CocktailTable::renameCocktail(const string &oldName, const string &newName) {
-    for (int i = 0; i < numOfCocktails; ++i) {
-        Cocktail currentCock = cocktails[i];
-        if (currentCock.getName() == oldName) {
-            currentCock.setName(newName);
-            return;
-        }
+    Cocktail *target = cocktails.get(oldName);
+
+    if (target) {
+        target->setName(newName);
+    } else {
+        throw std::out_of_range("Cocktail not found");
     }
-    std::cerr << "Cocktail not found." << std::endl;
 }
 
 // IO operators
 ostream &operator<<(ostream &out, const CocktailTable &table) {
     for (int i = 0; i < table.cocktails.getCapacity(); ++i) {
-        Node* node = table.getElemViaIndex(i);
+        Node *node = table.getElemViaIndex(i);
         while (node) {
             out << "Name: " << node->cocktail->getName()
                 << ", Alcohol: " << node->cocktail->getAlcoholPercentage()

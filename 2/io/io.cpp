@@ -11,3 +11,7 @@ auto checkAlcohol(int &alcohol) -> bool {
 auto checkVolume(int &volume) -> bool {
     return (volume > 0);
 }
+
+auto checkN(int &n) -> bool {
+    return n > 0;
+}

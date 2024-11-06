@@ -2,14 +2,43 @@
 #include "io/io.h"
 #include "cocktail/cocktail.h"
 
-const std::string PROMPT("Choose:\n\t0 - exit\n\t1 - add new cocktail\n\t2 - view cocktail\n\t3 - view table status\n\t4 - delete cocktail\n\t5 - get 500 ml of cocktail\n\t6 - get number of cocktails with %\n\t7 - rename cocktail\n>> ");
-const std::string PROMPT_NAME("Enter name of cocktail ('Water' if you want water):\n>> ");
-const std::string PROMPT_OLD_NAME("Enter old name of cocktail ('Water' if you want water):\n>> ");
-const std::string PROMPT_NEW_NAME("Enter new name of cocktail ('Water' if you want water):\n>> ");
-const std::string PROMPT_ALCOHOL("Enter alcohol % of cocktail:\n>> ");
-const std::string PROMPT_MIN_ALCOHOL("Enter minimum alcohol % of cocktail:\n>> ");
-const std::string PROMPT_MAX_ALCOHOL("Enter maximum alcohol % of cocktail:\n>> ");
-const std::string PROMPT_VOLUME("Enter volume of cocktail:\n>> ");
+void increaseVolume(CocktailTable &table) {
+    int n;
+    std::string cock;
+    while (!getInput(n, PROMPT_N) || !checkN(n));
+    while(!getInput(cock, PROMPT_NAME));
+    Cocktail cocktail = table[cock];
+    cocktail = cocktail * n;
+}
+
+
+void pourCocktail(CocktailTable &table) {
+    std::cout << "First, write the name of the cocktail that you will pour, then the name of the cocktail that you will pour into" << std::endl;
+    std::string cock1;
+    std::string cock2;
+    while(!getInput(cock1, PROMPT_FIRST_NAME));
+    Cocktail cocktail1 = table[cock1];
+    while(!getInput(cock2, PROMPT_SECOND_NAME));
+    Cocktail cocktail2 = table[cock2];
+    cocktail1 >> cocktail2;
+    if (cocktail1.getVolume() == 0) {
+        table.removeCocktail(cock1);
+    }
+}
+
+
+void mixCocktails(CocktailTable &table) {
+    std::string cock1;
+    std::string cock2;
+    while(!getInput(cock1, PROMPT_FIRST_NAME));
+    Cocktail cocktail1 = table[cock1];
+    while(!getInput(cock2, PROMPT_SECOND_NAME));
+    Cocktail cocktail2 = table[cock2];
+    Cocktail cocktail3 = cocktail1 + cocktail2;
+    table.removeCocktail(cock1);
+    table.removeCocktail(cock2);
+    table += cocktail3;
+}
 
 
 void renameCock(CocktailTable &table) {
@@ -67,18 +96,18 @@ void addNew(CocktailTable &table) {
 
 
 void finish(CocktailTable &table) {
-    std::cout << "Goodbye" << std::endl;
+    std::cout << "Goodbye! You had " << table.getSize() << " cocktails" << std::endl;
 }
 
 
 auto main() -> int {
-    void (*funcs[8])(CocktailTable &table) = {finish, addNew, viewCocktail, viewTable, deleteCocktail, get500ml,
-                                              getTotalVolume, renameCock};
+    void (*funcs[11])(CocktailTable &table) = {finish, addNew, viewCocktail, viewTable, deleteCocktail, get500ml,
+                                              getTotalVolume, renameCock, mixCocktails, pourCocktail, increaseVolume};
 
     try {
         int choice = 0;
-        Cocktail water(1000);
-        Cocktail cocktailArr[1] = {water};
+        auto *water = new Cocktail(1000);
+        Cocktail *cocktailArr[1] = {water};
         CocktailTable table(cocktailArr, 1);
         do {
             while (!getInput(choice, PROMPT) || !checkChoice(choice));

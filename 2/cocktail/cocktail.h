@@ -33,20 +33,20 @@ public:
     /**
      * @brief Empty constructor
      */
-    explicit Cocktail();
+    Cocktail();
 
     /**
-     * @brief Makes cocktail with users parameters
+     * @brief Makes cocktail with users' parameters
      * Gets name, alcohol and volume of cocktail from user and makes cocktail
      * @param n - name of cocktail
      * @param alcohol - alcohol percentage
      * @param vol - volume
      */
-    explicit Cocktail(string &n, int alcohol, int vol);
+    explicit Cocktail(string n, int alcohol, int vol);
 
     /**
      * @brief Makes glass of water
-     * Gets only volume to make a glass of water
+     * Gets only volume from user to make a glass of water
      * @param vol - volume of water
      */
     explicit Cocktail(int vol);
@@ -108,8 +108,8 @@ public:
     Cocktail operator+(const Cocktail &other);
 
     /**
-     * @brief Put the cocktail over
-     * Put 100ml or less (if volume < 100 ml) to other cocktail
+     * @brief Pour the cocktail over
+     * Pour 100ml or less (if volume < 100 ml) to other cocktail
      * @param other - destination cocktail
      * @return This cocktail with less volume
      */
@@ -121,7 +121,7 @@ public:
      * @param multiplier - on what increase
      * @return This cocktail with new volume
      */
-    Cocktail operator*(int &multiplier);
+    Cocktail operator*(int multiplier);
 
     /**
      * @brief Print cocktail information
@@ -171,6 +171,8 @@ public:
 
     [[nodiscard]] int getCapacity() const;
 
+    [[nodiscard]] int getSize() const;
+
     [[nodiscard]] Node *getElem(int ind) const;
 
     ~HashTable();
@@ -204,7 +206,7 @@ public:
      * @param cocktailsArray - array of cocktails
      * @param n - number of cocktails
      */
-    explicit CocktailTable(Cocktail cocktailsArray[], int n);
+    explicit CocktailTable(Cocktail *cocktailsArray[], int n);
 
     CocktailTable(const CocktailTable &other);
 
@@ -215,6 +217,8 @@ public:
     CocktailTable &operator=(CocktailTable &&other) noexcept;
 
     ~CocktailTable() = default;
+
+
 
     /**
      * @brief Check if num of cocktails = 0
@@ -240,7 +244,7 @@ public:
      */
     void removeCocktail(const string &name);
 
-    Node *getElemViaIndex(int ind) const;
+    [[nodiscard]] Node *getElemViaIndex(int ind) const;
 
     /**
      * @brief Get cocktail with specific % of alcohol
@@ -251,6 +255,8 @@ public:
     Cocktail getCocktail(int minAlcohol, int maxAlcohol);
 
     int getCapacity();
+
+    int getSize();
 
     /**
      * @brief Get total volume of cocktail with specific alcohol percentage
