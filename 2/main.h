@@ -7,7 +7,7 @@
 
 #include <string>
 
-const std::string PROMPT = "Choose:\n\t0 - exit\n\t1 - add new cocktail\n\t2 - view cocktail\n\t3 - view table status\n\t4 - delete cocktail\n\t5 - get 500 ml of cocktail\n\t6 - get number of cocktails with %\n\t7 - rename cocktail\n\t8 - mix cocktails\n\t9 - pour the cocktail\n\t10 - increase volume n times\n>> ";
+const std::string PROMPT("Choose:\n\t0 - exit\n\t1 - add new cocktail\n\t2 - view cocktail\n\t3 - view table status\n\t4 - delete cocktail\n\t5 - get 500 ml of cocktail\n\t6 - get number of cocktails with %\n\t7 - rename cocktail\n\t8 - mix cocktails\n\t9 - pour the cocktail\n\t10 - increase volume n times\n>> ");
 const std::string PROMPT_N("Enter n\n>> ");
 const std::string PROMPT_NAME("Enter name of cocktail ('Water' if you want water):\n>> ");
 const std::string PROMPT_OLD_NAME("Enter old name of cocktail ('Water' if you want water):\n>> ");

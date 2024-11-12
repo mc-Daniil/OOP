@@ -31,8 +31,7 @@ Cocktail &Cocktail::operator>>(Cocktail &other) {
 }
 
 Cocktail Cocktail::operator*(int multiplier) {
-    volume *= multiplier;
-    return *this;
+    return Cocktail(name, alcoholPercentage, volume * multiplier);
 }
 
 ostream &operator<<(ostream &out, const Cocktail &cocktail) {
@@ -63,6 +62,81 @@ HashTable::HashTable(int cap) : capacity(cap), size(0) {
     }
 }
 
+HashTable::HashTable(const HashTable &other) : capacity(other.capacity), size(other.size) {
+    table = new Node *[capacity];
+    for (int i = 0; i < capacity; ++i) {
+        if (other.table[i]) {
+            Node *srcNode = other.table[i];
+            Node *prevNewNode = nullptr;
+            while (srcNode) {
+                Node *newNode = new Node(new Cocktail(*srcNode->cocktail));
+                if (prevNewNode) {
+                    prevNewNode->next = newNode;
+                } else {
+                    table[i] = newNode;
+                }
+                prevNewNode = newNode;
+                srcNode = srcNode->next;
+            }
+        } else {
+            table[i] = nullptr;
+        }
+    }
+}
+
+HashTable &HashTable::operator=(const HashTable &other) {
+    if (this != &other) {
+        clearTable();
+        delete[] table;
+
+        capacity = other.capacity;
+        size = other.size;
+        table = new Node *[capacity];
+
+        for (int i = 0; i < capacity; ++i) {
+            if (other.table[i]) {
+                Node *srcNode = other.table[i];
+                Node *prevNewNode = nullptr;
+                while (srcNode) {
+                    Node *newNode = new Node(new Cocktail(*srcNode->cocktail));
+                    if (prevNewNode) {
+                        prevNewNode->next = newNode;
+                    } else {
+                        table[i] = newNode;
+                    }
+                    prevNewNode = newNode;
+                    srcNode = srcNode->next;
+                }
+            } else {
+                table[i] = nullptr;
+            }
+        }
+    }
+    return *this;
+}
+
+HashTable::HashTable(HashTable &&other) noexcept: table(other.table), capacity(other.capacity), size(other.size) {
+    other.table = nullptr;
+    other.capacity = 0;
+    other.size = 0;
+}
+
+HashTable &HashTable::operator=(HashTable &&other) noexcept {
+    if (this != &other) {
+        clearTable();
+        delete[] table;
+
+        capacity = other.capacity;
+        size = other.size;
+        table = other.table;
+
+        other.table = nullptr;
+        other.capacity = 0;
+        other.size = 0;
+    }
+    return *this;
+}
+
 int HashTable::hash(const std::string &name) const {
     int res = 0;
     for (char c: name) {
@@ -72,10 +146,44 @@ int HashTable::hash(const std::string &name) const {
 }
 
 
-void HashTable::insert(Cocktail *cock) {
-    int ind(hash(cock->getName()));
-    Node *newNode = new Node(cock);
+void HashTable::rehash() {
+    int oldCapacity = capacity;
+    capacity *= 2;
+    Node **newTable = new Node *[capacity];
+    for (int i = 0; i < capacity; ++i) {
+        newTable[i] = nullptr;
+    }
 
+    for (int i = 0; i < oldCapacity; ++i) {
+        Node *current = table[i];
+        while (current) {
+            Node *nextNode = current->next;
+            int newIndex = hash(current->cocktail->getName());
+            current->next = newTable[newIndex];
+            newTable[newIndex] = current;
+            current = nextNode;
+        }
+    }
+    delete[] table;
+    table = newTable;
+}
+
+
+void HashTable::insert(Cocktail *cock) {
+    if (!table) {
+        throw std::runtime_error("HashTable is not initialized.");
+    }
+
+    if (get(cock->getName())) {
+        throw std::runtime_error("Cocktail already exists in the hash table.");
+    }
+
+    if (size == capacity) {
+        rehash();
+    }
+
+    int ind = hash(cock->getName());
+    Node *newNode = new Node(cock);
     newNode->next = table[ind];
     table[ind] = newNode;
     ++size;
@@ -83,7 +191,11 @@ void HashTable::insert(Cocktail *cock) {
 
 
 void HashTable::remove(const std::string &name) {
-    int ind(hash(name));
+    if (!table) {
+        throw std::runtime_error("HashTable is not initialized or has been moved.");
+    }
+
+    int ind = hash(name);
     Node *current = table[ind];
     Node *previous = nullptr;
 
@@ -104,7 +216,6 @@ void HashTable::remove(const std::string &name) {
     }
 }
 
-
 void HashTable::clearTable() {
     for (int i = 0; i < capacity; ++i) {
         Node *current = table[i];
@@ -121,7 +232,11 @@ void HashTable::clearTable() {
 
 
 Cocktail *HashTable::get(const std::string &name) {
-    int ind(hash(name));
+    if (!table) {
+        throw std::runtime_error("HashTable is not initialized or has been moved.");
+    }
+
+    int ind = hash(name);
     Node *current = table[ind];
 
     while (current) {
@@ -142,13 +257,19 @@ int HashTable::getSize() const {
 }
 
 Node *HashTable::getElem(int ind) const {
+    if (!table || ind < 0 || ind >= capacity) {
+        throw std::runtime_error("Invalid access to hash table.");
+    }
     return table[ind];
 }
 
 
 HashTable::~HashTable() {
     clearTable();
-    delete[]table;
+    if (table) {
+        delete[] table;
+        table = nullptr;
+    }
 }
 
 
@@ -171,11 +292,6 @@ CocktailTable::CocktailTable(const CocktailTable &other) {
 }
 
 
-CocktailTable::CocktailTable(CocktailTable &&other) noexcept {
-    cocktails = std::move(other.cocktails);
-}
-
-
 CocktailTable &CocktailTable::operator=(const CocktailTable &other) {
     if (this != &other) {
         cocktails.clearTable();
@@ -193,6 +309,9 @@ CocktailTable &CocktailTable::operator=(const CocktailTable &other) {
 }
 
 
+CocktailTable::CocktailTable(CocktailTable &&other) noexcept: cocktails(std::move(other.cocktails)) {}
+
+
 CocktailTable &CocktailTable::operator=(CocktailTable &&other) noexcept {
     if (this != &other) {
         cocktails.clearTable();
@@ -201,10 +320,6 @@ CocktailTable &CocktailTable::operator=(CocktailTable &&other) noexcept {
     return *this;
 }
 
-
-int CocktailTable::getCapacity() {
-    return cocktails.getCapacity();
-}
 
 int CocktailTable::getSize() {
     return cocktails.getSize();
@@ -222,19 +337,6 @@ bool CocktailTable::isFull() const {
     return cocktails.getSize() == cocktails.getCapacity();
 }
 
-CocktailTable &CocktailTable::operator+=(const Cocktail &cocktail) {
-    auto *newCock = new Cocktail(cocktail);
-    cocktails.insert(newCock);
-    return *this;
-}
-
-Cocktail &CocktailTable::operator[](const string &name) {
-    Cocktail *cock = cocktails.get(name);
-    if (!cock) {
-        throw std::runtime_error("Cocktail not found!");
-    }
-    return *cock;
-}
 
 void CocktailTable::removeCocktail(const string &name) {
     cocktails.remove(name);
@@ -245,8 +347,9 @@ Node *CocktailTable::getElemViaIndex(int ind) const {
     return cocktails.getElem(ind);
 }
 
+
 Cocktail CocktailTable::getCocktail(int minAlcohol, int maxAlcohol) {
-    Cocktail resultCock((string &) "Mixed", 0, 0);
+    Cocktail resultCock(std::string("Mixed"), 0, 0);
     int totalVolume = 0;
 
     for (int i = 0; i < cocktails.getCapacity(); ++i) {
@@ -297,6 +400,7 @@ Cocktail CocktailTable::getCocktail(int minAlcohol, int maxAlcohol) {
     throw std::out_of_range("Cocktail not found");
 }
 
+
 int CocktailTable::totalVolume(int lowerBound, int upperBound) const {
     int totalVolume = 0;
 
@@ -318,6 +422,7 @@ int CocktailTable::totalVolume(int lowerBound, int upperBound) const {
     return totalVolume;
 }
 
+
 void CocktailTable::renameCocktail(const string &oldName, const string &newName) {
     Cocktail *target = cocktails.get(oldName);
 
@@ -327,6 +432,22 @@ void CocktailTable::renameCocktail(const string &oldName, const string &newName)
         throw std::out_of_range("Cocktail not found");
     }
 }
+
+
+CocktailTable &CocktailTable::operator+=(const Cocktail &cocktail) {
+    auto *newCock = new Cocktail(cocktail);
+    cocktails.insert(newCock);
+    return *this;
+}
+
+Cocktail &CocktailTable::operator[](const string &name) {
+    Cocktail *cock = cocktails.get(name);
+    if (!cock) {
+        throw std::runtime_error("Cocktail not found!");
+    }
+    return *cock;
+}
+
 
 // IO operators
 ostream &operator<<(ostream &out, const CocktailTable &table) {
