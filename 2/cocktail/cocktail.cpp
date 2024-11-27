@@ -36,7 +36,7 @@ Cocktail Cocktail::operator*(int multiplier) {
 
 ostream &operator<<(ostream &out, const Cocktail &cocktail) {
     out << "Cocktail: " << cocktail.name << " | Alcohol: " << cocktail.alcoholPercentage << "%" << " | Volume: "
-        << cocktail.volume << "ml";
+        << cocktail.volume << "ml" << std::endl;
     return out;
 }
 
