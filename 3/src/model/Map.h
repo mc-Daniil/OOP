@@ -1,3 +1,7 @@
+/**
+ * @file Map.h
+ * @brief Environment with cells
+ */
 #ifndef INC_3_ENVIRONMENT_H
 #define INC_3_ENVIRONMENT_H
 
@@ -6,20 +10,56 @@
 #include "Cell.h"
 
 using uint = unsigned int;
-
+/**
+ * @class Map
+ * @brief Environment with cells
+ * Available operations:
+ * 1) Construct
+ * 2) Set cell with coordinates
+ * 3) Resize map (multiple variants)
+ * 4) Get width and height
+ */
 class Map {
 private:
+    /**
+     * @brief Width and height
+     */
     std::pair<uint, uint> shape;
+    /**
+     * @brief Vector of cels
+     */
     std::vector<std::vector<std::shared_ptr<Cell>>> grid;
 public:
+    /**
+     * @brief Empty constructor
+     */
     Map() = default;
 
+    /**
+     * @brief Constructor of map with width and height
+     * @param width - width of field
+     * @param height - height of field
+     */
     Map(uint width, uint height);
 
-    auto setCell(std::pait<uint, uint> coords, std::shared_ptr<Cell> cell);
+    /**
+     * @brief Set the cell with coordinates
+     * @param coords - x andy  of the cell
+     * @param cell - pointer to the cell
+     * @throws std::out_of_range
+     */
+    auto setCell(std::pair<uint, uint> coords, std::shared_ptr<Cell> cell);
 
-    auto resizeField(std::pair<uint, uint> newShape);
+    /**
+     * @brief Resize the environment with given parameters
+     * @param newShape - new width and height
+     */
+    auto resizeMap(std::pair<uint, uint> newShape);
 
+    /**
+     * @brief Get width and height of the map
+     * @return pair of width and height
+     */
     [[nodiscard]] std::pair<uint, uint> getShape() const;
 };
 
