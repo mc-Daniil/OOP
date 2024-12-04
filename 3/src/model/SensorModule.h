@@ -16,10 +16,12 @@ private:
 public:
     SensorModule(ModuleType type, uint energyConsumptionActive, uint energyConsumptionPassive,
                  uint slotsRequired, uint range, SensorType sensorType);
-    [[nodiscard]] SensorType getType() const;
+
+    [[nodiscard]] SensorType getSensorType() const;
+
     [[nodiscard]] uint getRange() const;
+
     void scanEnvironment();
-    void work() override;
 };
 
 #endif //INC_3_SENSORMODULE_H

@@ -1,12 +1,21 @@
+/**
+ * @file Module.h
+ * Realization of abstract module
+ */
 #ifndef INC_3_MODULE_H
 #define INC_3_MODULE_H
 
 using uint = unsigned int;
-
+/**
+ * @enum ModuleType
+ */
 enum class ModuleType {
     NETWORK, SENSOR, WEAPON
 };
-
+/**
+ * @class Module
+ * @brief Abstract module
+ */
 class Module {
 protected:
     ModuleType type;
@@ -30,8 +39,6 @@ public:
     virtual void off();
 
     [[nodiscard]] bool isOn() const;
-
-    virtual void work();
 };
 
 #endif //INC_3_MODULE_H

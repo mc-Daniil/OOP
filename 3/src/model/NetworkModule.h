@@ -19,13 +19,11 @@ public:
 
     [[nodiscard]] uint getRange() const;
 
-    void establishConnection(std::shared_ptr<Module> &target);
+    void connect(std::shared_ptr<Module> &target);
 
     void disconnect(std::shared_ptr<Module> &target);
 
     [[nodiscard]] const std::vector<std::shared_ptr<Module>> &getActiveConnections() const;
-
-    void work() override;
 };
 
 #endif //INC_3_NETWORKMODULE_H
