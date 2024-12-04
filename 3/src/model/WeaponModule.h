@@ -18,7 +18,6 @@ public:
     void startCharging();
     void stopCharging();
     void neutralizeTarget();
-    void work() override;
 };
 
 #endif //INC_3_WEAPONMODULE_H
