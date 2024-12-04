@@ -16,7 +16,7 @@ protected:
     uint moduleSlots;
     std::vector<std::shared_ptr<Module>> modules;
 public:
-    Platform(uint x, uint y, const std::string &description, uint energyLevel, uint moduleSlots);
+    Platform(uint x, uint y, std::string description, uint energyLevel, uint moduleSlots);
 
     virtual ~Platform() = default;
 
@@ -37,8 +37,6 @@ public:
     virtual void removeModule(const std::shared_ptr<Module> &module);
 
     [[nodiscard]] const std::vector<std::shared_ptr<Module>> &getModules() const;
-
-    virtual void work();
 };
 
 #endif //INC_3_PLATFORM_H

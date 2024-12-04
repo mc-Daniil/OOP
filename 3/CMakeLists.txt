@@ -13,4 +13,9 @@ add_executable(main main.cpp main.h src/model/Map.cpp
         src/model/NetworkModule.cpp
         src/model/SensorModule.h
         src/model/SensorModule.cpp
-        src/model/Platform.h)
+        src/model/Platform.h
+        src/model/Platform.cpp
+        src/model/StationaryPlatform.h
+        src/model/StationaryPlatform.cpp
+        src/model/MobilePlatform.h
+        src/model/MobilePlatform.cpp)

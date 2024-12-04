@@ -5,14 +5,13 @@
 
 class MobilePlatform : public Platform {
 private:
-    int speed;
+    uint speed;
 public:
     MobilePlatform(uint x, uint y, const std::string &description, uint energyLevel, uint moduleSlots);
-    [[nodiscard]] int getSpeed() const;
-    void setSpeed(int speed);
+    [[nodiscard]] uint getSpeed() const;
+    void setSpeed(uint speed);
     void setCoordinates(uint x, uint y) override;
-    void work() override;
-    void move(uint x, uint y);
+    void MobilePlatform::move(uint x, uint y);
 };
 
 #endif //INC_3_MOBILEPLATFORM_H
