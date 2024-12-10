@@ -16,7 +16,7 @@ auto Map::setCell(std::pair<uint, uint> coords, std::shared_ptr<Cell> cell) {
 }
 
 auto Map::resizeMap(std::pair<uint, uint> newShape) {
-    // ???
+    // дополнить пустыми клетками
 }
 
 std::pair<uint, uint> Map::getShape() const {

@@ -11,6 +11,7 @@ using uint = unsigned int;
 class Platform {
 protected:
     std::pair<uint, uint> coordinates;
+    // TODO: type of platform
     std::string description;
     uint energyLevel;
     uint moduleSlots;

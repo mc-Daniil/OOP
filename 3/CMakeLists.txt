@@ -20,4 +20,5 @@ add_executable(main main.cpp main.h src/model/Map.cpp
         src/model/MobilePlatform.h
         src/model/MobilePlatform.cpp
         src/model/WeaponModule.h
-        src/model/WeaponModule.cpp)
+        src/model/WeaponModule.cpp
+        src/model/Vector.h)
