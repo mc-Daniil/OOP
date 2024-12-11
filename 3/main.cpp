@@ -1,7 +1,8 @@
 #include "main.h"
-#include "src/model/Map.h"
+#include "src/model/Vector.h"
 
 int main() {
-    std::cout << "Hi" << std::endl;
+    static_assert(std::random_access_iterator<VectorIterator<int, false>>);
+    static_assert(std::random_access_iterator<VectorIterator<int, true>>);
     return 0;
 }
