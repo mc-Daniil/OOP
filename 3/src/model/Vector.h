@@ -1,3 +1,8 @@
+/**
+ * @file Vector.h
+ * @brief Template vector
+ */
+
 #ifndef LAB3_VECTOR_H
 #define LAB3_VECTOR_H
 

@@ -32,6 +32,7 @@ enum class CellType {
     WEAPONPASSIVE,
     INTRUDER
 };
+
 using uint = unsigned int;
 
 /**
@@ -73,13 +74,19 @@ public:
      * @param newType - type of the cell
      * @throws std::out_of_range
      */
-    auto setType(CellType newType);
+    void setType(CellType newType);
 
     /**
      * @brief Get x and y of the cell
      * @return std::pair of x, y
      */
-    [[nodiscard]]std::pair<uint, uint> getCoordinates() const;
+    [[nodiscard]] std::pair<uint, uint> getCoordinates() const;
+
+    /**
+     * @brief Check if the cell is accessible for the intruder
+     * @return true if accessible, false otherwise
+     */
+    [[nodiscard]] bool isAccessible() const;
 };
 
 #endif //INC_3_CELL_H

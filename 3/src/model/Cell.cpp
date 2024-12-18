@@ -9,7 +9,7 @@ CellType Cell::getType() const {
     return type;
 }
 
-auto Cell::setType(CellType newType) {
+void Cell::setType(CellType newType) {
     if (newType < CellType::EMPTY || newType > CellType::INTRUDER) {
         throw std::out_of_range("No such type");
     }
@@ -18,4 +18,9 @@ auto Cell::setType(CellType newType) {
 
 std::pair<uint, uint> Cell::getCoordinates() const {
     return coordinates;
+}
+
+bool Cell::isAccessible() const {
+    // Ячейка доступна, если она пустая
+    return type == CellType::EMPTY;
 }

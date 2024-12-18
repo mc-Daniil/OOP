@@ -1,16 +1,14 @@
 #include "StationaryPlatform.h"
 #include <stdexcept>
+#include <algorithm>
+#include <utility>
 
-StationaryPlatform::StationaryPlatform(uint x, uint y, const std::string &description, uint energyLevel,
+StationaryPlatform::StationaryPlatform(uint x, uint y, std::string description, uint energyLevel,
                                        uint moduleSlots)
-        : coordinates({x, y}), description(description), energyLevel(energyLevel), moduleSlots(moduleSlots) {}
+        : coordinates({x, y}), description(std::move(description)), energyLevel(energyLevel), moduleSlots(moduleSlots) {}
 
 std::pair<uint, uint> StationaryPlatform::getCoordinates() const {
     return coordinates;
-}
-
-void StationaryPlatform::setCoordinates(uint x, uint y) {
-    throw std::runtime_error("Stationary platform can't move");
 }
 
 std::string StationaryPlatform::getDescription() const {
