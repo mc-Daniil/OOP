@@ -63,6 +63,26 @@ void MobilePlatform::setSpeed(uint newSpeed) {
     speed = newSpeed;
 }
 
-void MobilePlatform::move(uint x, uint y) {
+void MobilePlatform::move(uint x, uint y, const Map &map) {
+    auto currentCoordinates = getCoordinates();
+
+    auto targetCell = map.getCell({x, y});
+    if (!targetCell || !targetCell->isAccessible()) {
+        throw std::runtime_error("Target cell is not accessible");
+    }
+
+    uint distance = std::abs(static_cast<int>(x) - static_cast<int>(currentCoordinates.first)) +
+                    std::abs(static_cast<int>(y) - static_cast<int>(currentCoordinates.second));
+
+    uint energyCost = distance * speed;
+    if (energyCost > energyLevel) {
+        throw std::runtime_error("Not enough energy to move");
+    }
+
+    energyLevel -= energyCost;
     setCoordinates(x, y);
+
+    map.getCell(currentCoordinates)->setType(CellType::EMPTY);
+    targetCell->setType(CellType::MOBACTIVEPLATFORM);
 }
+

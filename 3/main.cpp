@@ -26,8 +26,13 @@ int main() {
     try {
         Map map = read_map_from_file(filename);
         Intruder intruder(1, 1);
+        MobilePlatform platform(2, 2, "Explorer", 100, 3);
 
         map.getCell({1, 1})->setType(CellType::INTRUDER);
+        map.getCell({2, 2})->setType(CellType::MOBACTIVEPLATFORM);
+
+        platform.setSpeed(2);
+        platform.move(3, 3, map);
 
         std::cout << "Initial map state:\n";
         show_map(map);
@@ -37,7 +42,7 @@ int main() {
             update_map(map, intruder);
             show_map(map);
 
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+            std::this_thread::sleep_for(std::chrono::seconds(5));
         }
     } catch (const std::exception &e) {
         std::cerr << "Error: " << e.what() << std::endl;

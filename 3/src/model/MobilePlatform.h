@@ -6,6 +6,7 @@
 #define INC_3_MOBILEPLATFORM_H
 
 #include "Platform.h"
+#include "Map.h"
 
 /**
  * @class MobilePlatform
@@ -132,7 +133,7 @@ public:
      * @param x - New x-coordinate
      * @param y - New y-coordinate
      */
-    void move(uint x, uint y);
+    void move(uint x, uint y, const Map &map);
 };
 
 #endif //INC_3_MOBILEPLATFORM_H

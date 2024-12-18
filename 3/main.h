@@ -5,5 +5,6 @@
 #include "src/model/Map.h"
 #include "src/ui/map_process.h"
 #include "src/model/Intruder.h"
+#include "src/model/MobilePlatform.h"
 
 #endif //LAB3_MAIN_H
