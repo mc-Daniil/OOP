@@ -12,6 +12,7 @@ using uint = unsigned int;
 enum class ModuleType {
     NETWORK, SENSOR, WEAPON
 };
+
 /**
  * @class Module
  * @brief Abstract module

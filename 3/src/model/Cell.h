@@ -6,6 +6,7 @@
 #define INC_3_CELL_H
 
 #include <utility>
+
 /**
  * @enum CellType
  * @brief Types of cells
@@ -15,9 +16,24 @@
  * INTRUDER - player
  */
 enum class CellType {
-    EMPTY, OBSTACLE, COMPONENT, INTRUDER
+    EMPTY,
+    OBSTACLE,
+    STATACTIVEPLATFORM,
+    STATPASSIVEPLATFORM,
+    MOBACTIVEPLATFORM,
+    MOBPASSIVEPLATFORM,
+    NETACTIVE,
+    NETPASSIVE,
+    SENSOROPTICACTIVE,
+    SENSOROPTICPASSIVE,
+    SENSORXRAYACTIVE,
+    SENSORXRAYPASSIVE,
+    WEAPONACTIVE,
+    WEAPONPASSIVE,
+    INTRUDER
 };
 using uint = unsigned int;
+
 /**
  * @class Cell
  * @brief Map consists of cells

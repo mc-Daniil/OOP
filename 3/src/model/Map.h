@@ -10,6 +10,7 @@
 #include "Cell.h"
 
 using uint = unsigned int;
+
 /**
  * @class Map
  * @brief Environment with cells
@@ -48,19 +49,27 @@ public:
      * @param cell - pointer to the cell
      * @throws std::out_of_range
      */
-    auto setCell(std::pair<uint, uint> coords, std::shared_ptr<Cell> cell);
+    void setCell(std::pair<uint, uint> coords, std::shared_ptr<Cell> cell);
 
     /**
      * @brief Resize the environment with given parameters
      * @param newShape - new width and height
      */
-    auto resizeMap(std::pair<uint, uint> newShape);
+    void resizeMap(std::pair<uint, uint> newShape);
 
     /**
      * @brief Get width and height of the map
      * @return pair of width and height
      */
     [[nodiscard]] std::pair<uint, uint> getShape() const;
+
+    /**
+     * @brief Get the cell at specified coordinates
+    * @param coords - pair of x and y coordinates
+    * @return Shared pointer to the cell
+     * @throws std::out_of_range if coordinates are out of bounds
+    */
+    [[nodiscard]] std::shared_ptr<Cell> getCell(std::pair<uint, uint> coords) const;
 };
 
 #endif //INC_3_ENVIRONMENT_H

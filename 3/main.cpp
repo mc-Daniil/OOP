@@ -1,8 +1,16 @@
 #include "main.h"
-#include "src/model/Vector.h"
+
 
 int main() {
-    static_assert(std::random_access_iterator<VectorIterator<int, false>>);
-    static_assert(std::random_access_iterator<VectorIterator<int, true>>);
+    std::string filename = "map.txt";
+    try {
+        Map map = read_map_from_file(filename);
+
+        std::cout << "Map contents:\n";
+        show_map(map);
+    } catch (const std::exception &e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+    }
+
     return 0;
 }

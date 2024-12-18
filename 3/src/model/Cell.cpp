@@ -19,4 +19,3 @@ auto Cell::setType(CellType newType) {
 std::pair<uint, uint> Cell::getCoordinates() const {
     return coordinates;
 }
-

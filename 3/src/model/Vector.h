@@ -184,7 +184,7 @@ public:
 
     Vector(size_type n, const T &t) requires std::copy_constructible<T>
             : Vector() {
-        insert(end(), n, t);
+        insert(static_cast<const_iterator>(end()), n, t);
     }
 
     template<std::input_iterator It>
@@ -440,12 +440,30 @@ public:
     }
 
     // Вставка элементов из списка инициализации
-    iterator insert(const_iterator p, std::initializer_list<T> il)requires std::move_constructible<T> {
-        return insert(p, il.begin(), il.end());
+    iterator insert(iterator p, const T &t) requires std::copy_constructible<T> {
+        return insert(const_iterator(p), t);
+    }
+
+    iterator insert(iterator p, T &&t) requires std::move_constructible<T> {
+        return insert(const_iterator(p), std::move(t));
     }
 
     // Удаление одного элемента
     iterator erase(const_iterator pos) noexcept {
+        size_t goal = pos - begin();
+        if (goal >= vector_size) {
+            return end();
+        }
+
+        for (size_t i = goal; i < vector_size - 1; ++i) {
+            data[i] = std::move(data[i + 1]);
+        }
+
+        --vector_size;
+        return begin() + goal;
+    }
+
+    iterator erase(iterator pos) noexcept {
         size_t goal = pos - begin();
         if (goal >= vector_size) {
             return end();

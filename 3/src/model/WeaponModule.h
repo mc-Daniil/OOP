@@ -15,8 +15,11 @@ public:
                  uint slotsRequired, uint range, uint chargingTime);
 
     [[nodiscard]] uint getRange() const;
+
     void startCharging();
+
     void stopCharging();
+
     void neutralizeTarget();
 };
 

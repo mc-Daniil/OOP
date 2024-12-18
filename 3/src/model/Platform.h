@@ -9,35 +9,26 @@
 using uint = unsigned int;
 
 class Platform {
-protected:
-    std::pair<uint, uint> coordinates;
-    // TODO: type of platform
-    std::string description;
-    uint energyLevel;
-    uint moduleSlots;
-    std::vector<std::shared_ptr<Module>> modules;
 public:
-    Platform(uint x, uint y, std::string description, uint energyLevel, uint moduleSlots);
-
     virtual ~Platform() = default;
 
-    [[nodiscard]] std::pair<uint, uint> getCoordinates() const;
+    [[nodiscard]] virtual std::pair<uint, uint> getCoordinates() const = 0;
 
-    virtual void setCoordinates(uint x, uint y);
+    virtual void setCoordinates(uint x, uint y) = 0;
 
-    [[nodiscard]] std::string getDescription() const;
+    [[nodiscard]] virtual std::string getDescription() const = 0;
 
-    void setDescription(const std::string &description);
+    virtual void setDescription(const std::string &description) = 0;
 
-    [[nodiscard]] uint getEnergyLevel() const;
+    [[nodiscard]] virtual uint getEnergyLevel() const = 0;
 
-    void setEnergyLevel(uint energyLevel);
+    virtual void setEnergyLevel(uint energyLevel) = 0;
 
-    virtual void installModule(const std::shared_ptr<Module> &module);
+    virtual void installModule(const std::shared_ptr<Module> &module) = 0;
 
-    virtual void removeModule(const std::shared_ptr<Module> &module);
+    virtual void removeModule(const std::shared_ptr<Module> &module) = 0;
 
-    [[nodiscard]] const std::vector<std::shared_ptr<Module>> &getModules() const;
+    [[nodiscard]] virtual const std::vector<std::shared_ptr<Module>> &getModules() const = 0;
 };
 
 #endif //INC_3_PLATFORM_H
