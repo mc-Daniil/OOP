@@ -86,3 +86,34 @@ void MobilePlatform::move(uint x, uint y, const Map &map) {
     targetCell->setType(CellType::MOBACTIVEPLATFORM);
 }
 
+
+std::pair<uint, uint> MobilePlatform::calculateNextMove(const Map &map) {
+    std::pair<uint, uint> current_coords = this->getCoordinates();
+    uint x = current_coords.first;
+    uint y = current_coords.second;
+
+    // Определяем возможные смещения
+    int dx[] = {-1, 1, 0, 0};
+    int dy[] = {0, 0, -1, 1};
+    int direction = rand() % 4;
+
+    // Рассчитываем новые координаты с учетом скорости
+    uint new_x = x + dx[direction] * speed;
+    uint new_y = y + dy[direction] * speed;
+
+    // Получаем размер карты
+    auto shape = map.getShape();
+
+    // Проверяем, не выходят ли новые координаты за пределы карты
+    if (new_x < shape.first && new_y < shape.second) {
+        // Проверяем, доступна ли целевая клетка для перемещения
+        if (map.getCell({new_x, new_y})->isAccessible()) {
+            return {new_x, new_y};
+        }
+    }
+
+    // Если клетка недоступна или координаты некорректны, остаёмся на месте
+    return current_coords;
+}
+
+

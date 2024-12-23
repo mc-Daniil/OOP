@@ -134,6 +134,8 @@ public:
      * @param y - New y-coordinate
      */
     void move(uint x, uint y, const Map &map);
+
+    std::pair<uint, uint> calculateNextMove(const Map &map);
 };
 
 #endif //INC_3_MOBILEPLATFORM_H
