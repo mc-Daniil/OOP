@@ -17,31 +17,25 @@
 #include "../model/Intruder.h"
 #include "../model/MobilePlatform.h"
 #include "../model/StationaryPlatform.h"
-#include "../model/QuantumPlatform.h"
 
 CellType charToCellType(char c);
 
 std::vector<std::string> parseModules(const std::string &data);
 
-Map read_map_from_file(const std::string &filename,
+extern "C" Map read_map_from_file(const std::string &filename,
                        std::vector<Intruder> &intruders,
                        std::vector<MobilePlatform> &mobilePlatforms,
-                       std::vector<StationaryPlatform> &stationaryPlatforms,
-                       std::vector<QuantumPlatform> &quantumPlatforms);
+                       std::vector<StationaryPlatform> &stationaryPlatforms);
 
-void show_map(const Map &map);
+extern "C" void show_map(const Map &map);
 
-void update_map(Map &map, std::vector<Intruder> &intruders,
-                std::vector<MobilePlatform> &mobilePlatforms,
-                std::vector<QuantumPlatform> &quantumPlatforms);
+extern "C" void update_map(Map &map, std::vector<Intruder> &intruders,
+                std::vector<MobilePlatform> &mobilePlatforms);
 
-void show_legend();
+extern "C" void show_legend();
 
 void move_intruder(Intruder &intruder, Map &map, std::mutex &map_mutex);
 
 void move_platform(MobilePlatform &platform, Map &map, std::mutex &map_mutex);
-
-void move_quantum_platform(QuantumPlatform &platform, Map &map, std::mutex &map_mutex,
-                           std::vector<Intruder> &intruders, std::vector<QuantumPlatform> &quantumPlatforms);
 
 #endif //LAB3_MAP_PROCESS_H

@@ -12,8 +12,6 @@ CellType charToCellType(char c) {
             return CellType::MOBACTIVEPLATFORM;
         case 'I':
             return CellType::INTRUDER;
-        case 'Q':
-            return CellType::QUANTUMPLATFORM;
         case 'W':
             return CellType::WEAPONACTIVE;
         case 'O':
@@ -23,7 +21,6 @@ CellType charToCellType(char c) {
             throw std::invalid_argument("Unknown cell type in map file");
     }
 }
-
 
 std::vector<std::string> parseModules(const std::string &data) {
     std::vector<std::string> modules;
@@ -62,8 +59,7 @@ std::vector<std::string> parseModules(const std::string &data) {
 Map read_map_from_file(const std::string &filename,
                        std::vector<Intruder> &intruders,
                        std::vector<MobilePlatform> &mobilePlatforms,
-                       std::vector<StationaryPlatform> &stationaryPlatforms,
-                       std::vector<QuantumPlatform> &quantumPlatforms) {
+                       std::vector<StationaryPlatform> &stationaryPlatforms) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         throw std::runtime_error("Error opening map file");
@@ -72,7 +68,6 @@ Map read_map_from_file(const std::string &filename,
     std::string line;
     std::vector<std::string> lines;
 
-    // Считываем строки из файла
     while (std::getline(file, line)) {
         if (!line.empty()) {
             lines.push_back(line);
@@ -111,8 +106,6 @@ Map read_map_from_file(const std::string &filename,
 
         while (std::getline(ss, cell, ';')) {
             try {
-                std::cout << "Processing cell at (" << x << ", " << y << "): \"" << cell << "\"" << std::endl;
-
                 std::smatch match;
                 if (std::regex_match(cell, match, cell_regex)) {
                     char type_char = match[1].str()[0];
@@ -125,14 +118,10 @@ Map read_map_from_file(const std::string &filename,
                     if (!module_data.empty()) {
                         auto modules = parseModules(module_data);
                         for (const auto &module: modules) {
-                            std::cout << "  Found module: " << module << std::endl;
                             if (type == CellType::MOBACTIVEPLATFORM) {
                                 mobilePlatforms.emplace_back(x, y, module, 100, 3);
                             } else if (type == CellType::STATACTIVEPLATFORM) {
                                 stationaryPlatforms.emplace_back(x, y, module, 100, 3);
-                            } else if (type == CellType::QUANTUMPLATFORM) {
-                                quantumPlatforms.emplace_back(x, y, std::string(module), 100, 5);
-
                             }
                         }
                     }
@@ -144,7 +133,6 @@ Map read_map_from_file(const std::string &filename,
                     throw std::invalid_argument("Invalid cell format");
                 }
             } catch (const std::exception &e) {
-                std::cerr << "Error processing cell at (" << x << ", " << y << "): " << e.what() << std::endl;
                 throw;
             }
             x++;
@@ -187,7 +175,6 @@ const std::map<CellType, std::string> cellColors = {
         {CellType::WEAPONACTIVE,        "\033[0;31m"},
         {CellType::WEAPONPASSIVE,       "\033[1;31m"},
         {CellType::INTRUDER,            "\033[1;37m"},
-        {CellType::QUANTUMPLATFORM,     "\033[0;35m"},
 };
 
 const std::string resetColor = "\033[0m";
@@ -201,7 +188,7 @@ void show_map(const Map &map) {
     for (uint x = 0; x < width; ++x) {
         std::cout << (x % 10);
     }
-    std::cout << "\n  +" << std::string(width, '-') << "+\n"; // Верхняя рамка карты
+    std::cout << "\n  +" << std::string(width, '-') << "+\n";
 
     for (uint y = 0; y < height; ++y) {
         std::cout << (y % 10) << " |";
@@ -258,9 +245,6 @@ void show_map(const Map &map) {
                     case CellType::INTRUDER:
                         std::cout << "I";
                         break;
-                    case CellType::QUANTUMPLATFORM:
-                        std::cout << "Q";
-                        break;
                     default:
                         std::cout << "?";
                         break;
@@ -276,7 +260,6 @@ void show_map(const Map &map) {
 
     std::cout << "  +" << std::string(width, '-') << "+\n";
 }
-
 
 void show_legend() {
     std::cout << "Legend:\n";
@@ -295,7 +278,6 @@ void show_legend() {
     std::cout << std::endl;
 }
 
-
 void move_intruder(Intruder &intruder, Map &map, std::mutex &map_mutex) {
     try {
         auto current_coords = intruder.getCoordinates();
@@ -306,9 +288,6 @@ void move_intruder(Intruder &intruder, Map &map, std::mutex &map_mutex) {
             map.getCell(current_coords)->setType(CellType::EMPTY);
             map.getCell(next_coords)->setType(CellType::INTRUDER);
             intruder.setCoordinates(next_coords.first, next_coords.second);
-        } else {
-            std::cout << "Cell (" << next_coords.first << ", " << next_coords.second
-                      << ") is not accessible for Intruder. Stays in place.\n";
         }
     } catch (const std::exception &e) {
         std::cerr << "Error during intruder movement: " << e.what() << std::endl;
@@ -325,9 +304,6 @@ void move_platform(MobilePlatform &platform, Map &map, std::mutex &map_mutex) {
             map.getCell(current_coords)->setType(CellType::EMPTY);
             map.getCell(next_coords)->setType(CellType::MOBACTIVEPLATFORM);
             platform.setCoordinates(next_coords.first, next_coords.second);
-        } else {
-            std::cout << "Cell (" << next_coords.first << ", " << next_coords.second
-                      << ") is not accessible for MobilePlatform. Stays in place.\n";
         }
     } catch (const std::exception &e) {
         std::cerr << "Error during platform movement: " << e.what() << std::endl;
@@ -335,9 +311,8 @@ void move_platform(MobilePlatform &platform, Map &map, std::mutex &map_mutex) {
 }
 
 void update_map(Map &map, std::vector<Intruder> &intruders,
-                std::vector<MobilePlatform> &mobilePlatforms,
-                std::vector<QuantumPlatform> &quantumPlatforms) {
-    std::mutex map_mutex; // Мьютекс для защиты карты
+                std::vector<MobilePlatform> &mobilePlatforms) {
+    std::mutex map_mutex;
 
     std::vector<std::thread> threads;
 
@@ -349,61 +324,10 @@ void update_map(Map &map, std::vector<Intruder> &intruders,
         threads.emplace_back(move_platform, std::ref(platform), std::ref(map), std::ref(map_mutex));
     }
 
-    for (auto &platform: quantumPlatforms) {
-        threads.emplace_back(move_quantum_platform, std::ref(platform), std::ref(map),
-                             std::ref(map_mutex), std::ref(intruders), std::ref(quantumPlatforms));
-    }
-
     for (auto &thread: threads) {
         if (thread.joinable()) {
             thread.join();
         }
     }
 }
-
-
-void move_quantum_platform(QuantumPlatform &platform, Map &map, std::mutex &map_mutex,
-                           std::vector<Intruder> &intruders, std::vector<QuantumPlatform> &quantumPlatforms) {
-    try {
-        auto current_coords = platform.getCoordinates();
-        auto next_coords = platform.calculateNextMove(map);
-
-        std::lock_guard<std::mutex> lock(map_mutex);
-
-        for (auto &otherPlatform: quantumPlatforms) {
-            if (&platform != &otherPlatform && platform.isWithinDetectionRadius(otherPlatform.getCoordinates())) {
-                platform.swapWith(otherPlatform);
-
-                std::vector<std::pair<uint, uint>> intruderPositions;
-                for (auto &intruder: intruders) {
-                    if (platform.isWithinDetectionRadius(intruder.getCoordinates())) {
-                        intruderPositions.push_back(intruder.getCoordinates());
-                    }
-                }
-
-                platform.teleportIntruders(intruderPositions);
-
-                map.getCell(current_coords)->setType(CellType::EMPTY);
-                map.getCell(next_coords)->setType(CellType::QUANTUMPLATFORM);
-                platform.setCoordinates(next_coords.first, next_coords.second);
-                return;
-            }
-        }
-
-        if (map.getCell(next_coords)->isAccessible()) {
-            map.getCell(current_coords)->setType(CellType::EMPTY);
-            map.getCell(next_coords)->setType(CellType::QUANTUMPLATFORM);
-            platform.setCoordinates(next_coords.first, next_coords.second);
-        } else {
-            std::cout << "Cell (" << next_coords.first << ", " << next_coords.second
-                      << ") is not accessible for QuantumPlatform. Stays in place.\n";
-        }
-
-    } catch (const std::exception &e) {
-        std::cerr << "Error during quantum platform movement: " << e.what() << std::endl;
-    }
-}
-
-
-
 

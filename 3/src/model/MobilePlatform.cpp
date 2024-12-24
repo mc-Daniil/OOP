@@ -2,7 +2,7 @@
 #include <algorithm>
 
 MobilePlatform::MobilePlatform(uint x, uint y, const std::string &description, uint energyLevel, uint moduleSlots)
-        : coordinates({x, y}), description(description), energyLevel(energyLevel), moduleSlots(moduleSlots), speed(0) {}
+        : coordinates({x, y}), description(description), energyLevel(energyLevel), moduleSlots(moduleSlots), speed(1) {}
 
 std::pair<uint, uint> MobilePlatform::getCoordinates() const {
     return coordinates;
