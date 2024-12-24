@@ -366,7 +366,7 @@ void update_map(Map &map, std::vector<Intruder> &intruders,
     // Создаем потоки для QuantumPlatforms
     for (auto &platform: quantumPlatforms) {
         threads.emplace_back(move_quantum_platform, std::ref(platform), std::ref(map),
-                             std::ref(map_mutex), std::ref(intruders));
+                             std::ref(map_mutex), std::ref(intruders), std::ref(quantumPlatforms));
     }
 
     // Ожидаем завершения всех потоков
@@ -379,26 +379,39 @@ void update_map(Map &map, std::vector<Intruder> &intruders,
 
 
 void move_quantum_platform(QuantumPlatform &platform, Map &map, std::mutex &map_mutex,
-                           std::vector<Intruder> &intruders) {
+                           std::vector<Intruder> &intruders, std::vector<QuantumPlatform> &quantumPlatforms) {
     try {
         auto current_coords = platform.getCoordinates();
-        auto next_coords = platform.calculateNextMove(map); // Реализуйте метод calculateNextMove
+        auto next_coords = platform.calculateNextMove(map);
 
         std::lock_guard<std::mutex> lock(map_mutex);
 
-        if (map.getCell(next_coords)->isAccessible()) {
-            // Телепортируем нарушителей
-            std::vector<std::pair<uint, uint>> intruderPositions;
-            for (auto &intruder: intruders) {
-                if (platform.isWithinDetectionRadius(intruder.getCoordinates())) { // Реализуйте isWithinDetectionRadius
-                    intruderPositions.push_back(intruder.getCoordinates());
-                    intruder.setCoordinates(next_coords.first, next_coords.second);
+        // Поиск другой квантовой платформы в пределах радиуса
+        for (auto &otherPlatform : quantumPlatforms) {
+            if (&platform != &otherPlatform && platform.isWithinDetectionRadius(otherPlatform.getCoordinates())) {
+                // Обмен местами с другой квантовой платформой
+                platform.swapWith(otherPlatform);
+
+                // Телепортация нарушителей
+                std::vector<std::pair<uint, uint>> intruderPositions;
+                for (auto &intruder : intruders) {
+                    if (platform.isWithinDetectionRadius(intruder.getCoordinates())) {
+                        intruderPositions.push_back(intruder.getCoordinates());
+                        intruder.setCoordinates(next_coords.first, next_coords.second);
+                    }
                 }
+                platform.teleportIntruders(intruderPositions);
+
+                // Обновление карты
+                map.getCell(current_coords)->setType(CellType::EMPTY);
+                map.getCell(next_coords)->setType(CellType::QUANTUMPLATFORM);
+                platform.setCoordinates(next_coords.first, next_coords.second);
+                return;  // Остановка после выполнения действия
             }
+        }
 
-            platform.teleportIntruders(intruderPositions);
-
-            // Обновляем карту
+        // Если не нашли платформу для обмена, просто перемещаем квантовую платформу
+        if (map.getCell(next_coords)->isAccessible()) {
             map.getCell(current_coords)->setType(CellType::EMPTY);
             map.getCell(next_coords)->setType(CellType::QUANTUMPLATFORM);
             platform.setCoordinates(next_coords.first, next_coords.second);
@@ -406,6 +419,7 @@ void move_quantum_platform(QuantumPlatform &platform, Map &map, std::mutex &map_
             std::cout << "Cell (" << next_coords.first << ", " << next_coords.second
                       << ") is not accessible for QuantumPlatform. Stays in place.\n";
         }
+
     } catch (const std::exception &e) {
         std::cerr << "Error during quantum platform movement: " << e.what() << std::endl;
     }

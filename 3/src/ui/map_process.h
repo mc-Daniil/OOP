@@ -42,6 +42,6 @@ void move_intruder(Intruder &intruder, Map &map, std::mutex &map_mutex);
 void move_platform(MobilePlatform &platform, Map &map, std::mutex &map_mutex);
 
 void move_quantum_platform(QuantumPlatform &platform, Map &map, std::mutex &map_mutex,
-                           std::vector<Intruder> &intruders);
+                           std::vector<Intruder> &intruders, std::vector<QuantumPlatform> &quantumPlatforms);
 
 #endif //LAB3_MAP_PROCESS_H
