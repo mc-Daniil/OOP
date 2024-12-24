@@ -1,6 +1,5 @@
 #include "map_process.h"
 
-// Функция для преобразования символа в тип клетки
 CellType charToCellType(char c) {
     switch (c) {
         case '.':
@@ -60,7 +59,6 @@ std::vector<std::string> parseModules(const std::string &data) {
     return modules;
 }
 
-// Чтение карты из файла
 Map read_map_from_file(const std::string &filename,
                        std::vector<Intruder> &intruders,
                        std::vector<MobilePlatform> &mobilePlatforms,
@@ -133,7 +131,7 @@ Map read_map_from_file(const std::string &filename,
                             } else if (type == CellType::STATACTIVEPLATFORM) {
                                 stationaryPlatforms.emplace_back(x, y, module, 100, 3);
                             } else if (type == CellType::QUANTUMPLATFORM) {
-                                quantumPlatforms.emplace_back(x, y, std::string(module), 100, 1);
+                                quantumPlatforms.emplace_back(x, y, std::string(module), 100, 5);
 
                             }
                         }
@@ -156,7 +154,6 @@ Map read_map_from_file(const std::string &filename,
     return map;
 }
 
-// Добавляем поддержку цветов (опционально)
 #ifdef _WIN32
 #include <windows.h>
 void enableAnsiColors() {
@@ -174,8 +171,6 @@ void enableAnsiColors() {}
 
 #endif
 
-
-// Цвета для типов ячеек
 const std::map<CellType, std::string> cellColors = {
         {CellType::EMPTY,               "\033[0;37m"},
         {CellType::OBSTACLE,            "\033[1;30m"},
@@ -192,11 +187,9 @@ const std::map<CellType, std::string> cellColors = {
         {CellType::WEAPONACTIVE,        "\033[0;31m"},
         {CellType::WEAPONPASSIVE,       "\033[1;31m"},
         {CellType::INTRUDER,            "\033[1;37m"},
-        {CellType::QUANTUMPLATFORM,     "\033[0;35m"}, // Цвет для квантовой платформы
+        {CellType::QUANTUMPLATFORM,     "\033[0;35m"},
 };
 
-
-// Сброс цвета
 const std::string resetColor = "\033[0m";
 
 void show_map(const Map &map) {
@@ -204,15 +197,14 @@ void show_map(const Map &map) {
 
     auto [width, height] = map.getShape();
 
-    // Верхняя рамка
     std::cout << "   ";
     for (uint x = 0; x < width; ++x) {
-        std::cout << (x % 10); // Номера колонок (по модулю 10)
+        std::cout << (x % 10);
     }
     std::cout << "\n  +" << std::string(width, '-') << "+\n"; // Верхняя рамка карты
 
     for (uint y = 0; y < height; ++y) {
-        std::cout << (y % 10) << " |"; // Номер строки (по модулю 10)
+        std::cout << (y % 10) << " |";
         for (uint x = 0; x < width; ++x) {
             std::shared_ptr<Cell> cell = map.getCell({x, y});
             if (cell) {
@@ -279,15 +271,13 @@ void show_map(const Map &map) {
                 std::cout << " ";
             }
         }
-        std::cout << "|" << std::endl; // Правая рамка карты
+        std::cout << "|" << std::endl;
     }
 
-    // Нижняя рамка
     std::cout << "  +" << std::string(width, '-') << "+\n";
 }
 
 
-// Легенда
 void show_legend() {
     std::cout << "Legend:\n";
     std::cout << "  . - Empty\n";
@@ -306,7 +296,6 @@ void show_legend() {
 }
 
 
-// Функция перемещения для Intruder
 void move_intruder(Intruder &intruder, Map &map, std::mutex &map_mutex) {
     try {
         auto current_coords = intruder.getCoordinates();
@@ -326,7 +315,6 @@ void move_intruder(Intruder &intruder, Map &map, std::mutex &map_mutex) {
     }
 }
 
-// Функция перемещения для MobilePlatform
 void move_platform(MobilePlatform &platform, Map &map, std::mutex &map_mutex) {
     try {
         auto current_coords = platform.getCoordinates();
@@ -353,23 +341,19 @@ void update_map(Map &map, std::vector<Intruder> &intruders,
 
     std::vector<std::thread> threads;
 
-    // Создаем потоки для Intruders
     for (auto &intruder: intruders) {
         threads.emplace_back(move_intruder, std::ref(intruder), std::ref(map), std::ref(map_mutex));
     }
 
-    // Создаем потоки для MobilePlatforms
     for (auto &platform: mobilePlatforms) {
         threads.emplace_back(move_platform, std::ref(platform), std::ref(map), std::ref(map_mutex));
     }
 
-    // Создаем потоки для QuantumPlatforms
     for (auto &platform: quantumPlatforms) {
         threads.emplace_back(move_quantum_platform, std::ref(platform), std::ref(map),
                              std::ref(map_mutex), std::ref(intruders), std::ref(quantumPlatforms));
     }
 
-    // Ожидаем завершения всех потоков
     for (auto &thread: threads) {
         if (thread.joinable()) {
             thread.join();
@@ -386,15 +370,12 @@ void move_quantum_platform(QuantumPlatform &platform, Map &map, std::mutex &map_
 
         std::lock_guard<std::mutex> lock(map_mutex);
 
-        // Поиск другой квантовой платформы в пределах радиуса
-        for (auto &otherPlatform : quantumPlatforms) {
+        for (auto &otherPlatform: quantumPlatforms) {
             if (&platform != &otherPlatform && platform.isWithinDetectionRadius(otherPlatform.getCoordinates())) {
-                // Обмен местами с другой квантовой платформой
                 platform.swapWith(otherPlatform);
 
-                // Телепортация нарушителей
                 std::vector<std::pair<uint, uint>> intruderPositions;
-                for (auto &intruder : intruders) {
+                for (auto &intruder: intruders) {
                     if (platform.isWithinDetectionRadius(intruder.getCoordinates())) {
                         intruderPositions.push_back(intruder.getCoordinates());
                         intruder.setCoordinates(next_coords.first, next_coords.second);
@@ -402,15 +383,13 @@ void move_quantum_platform(QuantumPlatform &platform, Map &map, std::mutex &map_
                 }
                 platform.teleportIntruders(intruderPositions);
 
-                // Обновление карты
                 map.getCell(current_coords)->setType(CellType::EMPTY);
                 map.getCell(next_coords)->setType(CellType::QUANTUMPLATFORM);
                 platform.setCoordinates(next_coords.first, next_coords.second);
-                return;  // Остановка после выполнения действия
+                return;
             }
         }
 
-        // Если не нашли платформу для обмена, просто перемещаем квантовую платформу
         if (map.getCell(next_coords)->isAccessible()) {
             map.getCell(current_coords)->setType(CellType::EMPTY);
             map.getCell(next_coords)->setType(CellType::QUANTUMPLATFORM);

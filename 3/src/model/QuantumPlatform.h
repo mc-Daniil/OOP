@@ -130,7 +130,6 @@ public:
      * @return Pair of new coordinates (x, y)
      */
     std::pair<uint, uint> calculateNextMove(Map &map) {
-        // Пример реализации: движемся на одну клетку вправо, если это возможно
         auto nextX = x + 1;
         auto nextY = y;
         if (map.isValidCoordinate(nextX, nextY) && map.getCell({nextX, nextY})->isAccessible()) {

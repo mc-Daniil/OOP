@@ -23,10 +23,8 @@ int main() {
         while (true) {
             std::cout << "Updating map...\n";
 
-            // Обновление карты для всех объектов
             update_map(map, intruders, mobilePlatforms, quantumPlatforms);
 
-            // Отображение карты
             show_map(map);
 
             std::this_thread::sleep_for(std::chrono::seconds(3));
