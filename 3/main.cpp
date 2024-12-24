@@ -5,24 +5,27 @@ int main() {
     std::string filename = "map.txt";
     try {
         std::vector<Intruder> intruders;
-        std::vector<MobilePlatform> platforms;
+        std::vector<MobilePlatform> mobilePlatforms;
+        std::vector<StationaryPlatform> stationaryPlatforms;
+
 
         // Считываем карту и создаём объекты
-        Map map = read_map_from_file(filename, intruders, platforms);
+        Map map = read_map_from_file(filename, intruders, mobilePlatforms, stationaryPlatforms);
 
         // Пример настройки MobilePlatform
-        if (!platforms.empty()) {
-            platforms[0].setSpeed(1);
+        if (!mobilePlatforms.empty()) {
+            mobilePlatforms[0].setSpeed(1);
         }
 
         std::cout << "Initial map state:\n";
+        show_legend();
         show_map(map);
 
         while (true) {
             std::cout << "Updating map...\n";
 
             // Обновление карты для всех объектов
-            update_map(map, intruders, platforms);
+            update_map(map, intruders, mobilePlatforms);
 
             // Отображение карты
             show_map(map);

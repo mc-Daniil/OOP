@@ -64,6 +64,8 @@ public:
      */
     [[nodiscard]] std::string getDescription() const override;
 
+    void setCoordinates(uint x, uint y) override;
+
     /**
      * @brief Set the description of the platform
      * @param description - New description

@@ -8,10 +8,13 @@
 #include <fstream>
 #include <vector>
 #include <memory>
+#include <sstream>
+#include <regex>
 #include "../model/Map.h"
 #include "../model/Cell.h"
 #include "../model/Intruder.h"
 #include "../model/MobilePlatform.h"
+#include "../model/StationaryPlatform.h"
 
 CellType charToCellType(char c);
 
@@ -21,7 +24,11 @@ void show_map(const Map &map);
 
 void update_map(Map &map, std::vector<Intruder> &intruders, std::vector<MobilePlatform> &platforms);
 
-Map read_map_from_file(const std::string &filename, std::vector<Intruder> &intruders,
-                       std::vector<MobilePlatform> &platforms);
+Map read_map_from_file(const std::string &filename,
+                       std::vector<Intruder> &intruders,
+                       std::vector<MobilePlatform> &platforms,
+                       std::vector<StationaryPlatform> &stationaryPlatforms);
+
+void show_legend();
 
 #endif //LAB3_MAP_PROCESS_H

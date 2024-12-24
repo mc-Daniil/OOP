@@ -39,8 +39,10 @@ CellType charToCellType(char c) {
 }
 
 
-Map read_map_from_file(const std::string &filename, std::vector<Intruder> &intruders,
-                       std::vector<MobilePlatform> &platforms) {
+Map read_map_from_file(const std::string &filename,
+                       std::vector<Intruder> &intruders,
+                       std::vector<MobilePlatform> &platforms,
+                       std::vector<StationaryPlatform> &stationaryPlatforms) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         throw std::runtime_error("Error opening map file");
@@ -65,33 +67,74 @@ Map read_map_from_file(const std::string &filename, std::vector<Intruder> &intru
     // Определяем размеры карты
     uint height = lines.size();
     uint width = 0;
-    for (const auto &line: lines) {
-        width = std::max(width, static_cast<uint>(line.length()));
+
+    for (const auto &line : lines) {
+        std::stringstream ss(line);
+        std::string cell;
+        uint current_width = 0;
+        while (std::getline(ss, cell, ';')) {
+            current_width++;
+        }
+        width = std::max(width, current_width);
     }
 
     // Создаём карту
     Map map(width, height);
     map.resizeMap({width, height});
 
+    // Обработка строк карты
     for (uint y = 0; y < height; ++y) {
         const auto &line = lines[y];
-        for (uint x = 0; x < line.length(); ++x) {
-            char c = line[x];
-            try {
-                CellType type = charToCellType(c);
-                std::shared_ptr<Cell> cell = std::make_shared<Cell>(type, x, y);
-                map.setCell({x, y}, cell);
+        std::stringstream ss(line);
+        std::string cell;
+        uint x = 0;
 
-                // Создание объектов Intruder и MobilePlatform
-                if (type == CellType::INTRUDER) {
-                    intruders.emplace_back(x, y);
-                } else if (type == CellType::MOBACTIVEPLATFORM) {
-                    platforms.emplace_back(x, y, "Samorez", 100, 3);
+        while (std::getline(ss, cell, ';')) {
+            try {
+                // Регулярное выражение для разбора клетки с модулями
+                std::regex platform_regex(R"(([PM])\(([^)]*)\))");
+                std::smatch match;
+
+                // Определяем тип клетки
+                if (std::regex_match(cell, match, platform_regex)) {
+                    char type_char = match[1].str()[0];
+                    std::string modules = match[2];
+
+                    CellType type = charToCellType(type_char);
+                    std::shared_ptr<Cell> cell_ptr = std::make_shared<Cell>(type, x, y);
+                    map.setCell({x, y}, cell_ptr);
+
+                    // Разбираем модули
+                    std::vector<std::string> module_list;
+                    std::stringstream module_stream(modules);
+                    std::string module;
+                    while (std::getline(module_stream, module, ',')) {
+                        module_list.push_back(module);
+                    }
+
+                    // Создаём платформы
+                    if (type == CellType::MOBACTIVEPLATFORM) {
+                        platforms.emplace_back(x, y, "MobilePlatform", 100, 3);
+                    } else if (type == CellType::STATACTIVEPLATFORM) {
+                        stationaryPlatforms.emplace_back(x, y, "StaticPlatform", 100, 3);
+                    }
+                } else {
+                    // Обычная клетка
+                    char c = cell[0];
+                    CellType type = charToCellType(c);
+                    std::shared_ptr<Cell> cell_ptr = std::make_shared<Cell>(type, x, y);
+                    map.setCell({x, y}, cell_ptr);
+
+                    // Создаём объекты для Intruder
+                    if (type == CellType::INTRUDER) {
+                        intruders.emplace_back(x, y);
+                    }
                 }
             } catch (const std::exception &e) {
                 std::cerr << "Error processing cell at (" << x << ", " << y << "): " << e.what() << std::endl;
                 throw;
             }
+            x++;
         }
     }
 
@@ -99,11 +142,19 @@ Map read_map_from_file(const std::string &filename, std::vector<Intruder> &intru
 }
 
 
-// Функция для отображения карты на экране
+
 void show_map(const Map &map) {
     auto [width, height] = map.getShape();
 
+    // Верхняя рамка
+    std::cout << "   ";
+    for (uint x = 0; x < width; ++x) {
+        std::cout << (x % 10); // Номера колонок (по модулю 10)
+    }
+    std::cout << "\n  +" << std::string(width, '-') << "+\n"; // Верхняя рамка карты
+
     for (uint y = 0; y < height; ++y) {
+        std::cout << (y % 10) << " |"; // Номер строки (по модулю 10)
         for (uint x = 0; x < width; ++x) {
             std::shared_ptr<Cell> cell = map.getCell({x, y});
             if (cell) {
@@ -154,17 +205,37 @@ void show_map(const Map &map) {
                         std::cout << "I";
                         break;
                     default:
-                        std::cerr << "Error: Unknown cell type!" << std::endl;
                         std::cout << "?";
                         break;
                 }
             } else {
-                std::cout << ".";
+                std::cout << " ";
             }
         }
-        std::cout << std::endl;
+        std::cout << "|" << std::endl; // Правая рамка карты
     }
+
+    // Нижняя рамка
+    std::cout << "  +" << std::string(width, '-') << "+\n";
 }
+
+
+void show_legend() {
+    std::cout << "Legend:\n";
+    std::cout << "  . - Empty\n";
+    std::cout << "  # - Obstacle\n";
+    std::cout << "  P - Static Active Platform\n";
+    std::cout << "  p - Static Passive Platform\n";
+    std::cout << "  M - Mobile Active Platform\n";
+    std::cout << "  m - Mobile Passive Platform\n";
+    std::cout << "  I - Intruder\n";
+    std::cout << "  N, n - Network\n";
+    std::cout << "  O, o - Optical Sensor\n";
+    std::cout << "  X, x - X-ray Sensor\n";
+    std::cout << "  W, w - Weapon\n";
+    std::cout << std::endl;
+}
+
 
 
 // Функция перемещения для Intruder

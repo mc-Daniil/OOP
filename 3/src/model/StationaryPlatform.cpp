@@ -15,6 +15,10 @@ std::string StationaryPlatform::getDescription() const {
     return description;
 }
 
+void StationaryPlatform::setCoordinates(uint x, uint y) {
+    coordinates = {x, y};
+}
+
 void StationaryPlatform::setDescription(const std::string &newDescription) {
     description = newDescription;
 }
