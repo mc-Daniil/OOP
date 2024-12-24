@@ -7,6 +7,8 @@ add_library(lib Map.cpp Map.h Cell.cpp Cell.h
         SensorModule.cpp
         StationaryPlatform.cpp
         WeaponModule.cpp
-        Intruder.cpp)
+        Intruder.cpp
+        QuantumPlatform.h
+        QuantumPlatform.cpp)
 
 
