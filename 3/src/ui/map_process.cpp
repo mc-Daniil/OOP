@@ -378,9 +378,9 @@ void move_quantum_platform(QuantumPlatform &platform, Map &map, std::mutex &map_
                 for (auto &intruder: intruders) {
                     if (platform.isWithinDetectionRadius(intruder.getCoordinates())) {
                         intruderPositions.push_back(intruder.getCoordinates());
-                        intruder.setCoordinates(next_coords.first, next_coords.second);
                     }
                 }
+
                 platform.teleportIntruders(intruderPositions);
 
                 map.getCell(current_coords)->setType(CellType::EMPTY);
@@ -403,3 +403,7 @@ void move_quantum_platform(QuantumPlatform &platform, Map &map, std::mutex &map_
         std::cerr << "Error during quantum platform movement: " << e.what() << std::endl;
     }
 }
+
+
+
+
