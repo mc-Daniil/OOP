@@ -2,12 +2,14 @@
 #define LAB3_QUANTUMPLATFORM_H
 
 #include "Platform.h"
+#include "Map.h"
+#include "Intruder.h"
 #include <cmath>
 #include <iostream>
-#include <thread>
-#include <mutex>
-#include <functional>
-
+#include <algorithm>
+#include <vector>
+#include <memory>
+#include <stdexcept>
 
 /**
  * @class QuantumPlatform
@@ -20,9 +22,10 @@ private:
     uint y;
     std::string description;
     uint energyLevel;
+    uint moduleSlots;
     std::vector<std::shared_ptr<Module>> modules;
     uint detectionRadius;
-    std::mutex platformMutex;
+
 public:
     /**
      * @brief Constructor for QuantumPlatform
@@ -33,7 +36,7 @@ public:
      * @param radius - Detection radius
      */
     QuantumPlatform(uint startX, uint startY, const std::string &desc, uint energy, uint radius)
-            : x(startX), y(startY), description(desc), energyLevel(energy), detectionRadius(radius) {}
+            : x(startX), y(startY), description(desc), energyLevel(energy), moduleSlots(1), detectionRadius(radius) {}
 
     /**
      * @brief Get the current coordinates of the platform
@@ -110,9 +113,9 @@ public:
     }
 
     /**
-    * @brief Swap places with another platform
-    * @param other - The other platform to swap with
-    */
+     * @brief Swap places with another platform
+     * @param other - The other platform to swap with
+     */
     void swapWith(QuantumPlatform &other);
 
     /**
@@ -120,6 +123,33 @@ public:
      * @param intruderPositions - Vector of intruder positions (pairs of x and y coordinates)
      */
     void teleportIntruders(std::vector<std::pair<uint, uint>> &intruderPositions);
+
+    /**
+     * @brief Calculate the next move for the platform based on the map.
+     * @param map - The map object
+     * @return Pair of new coordinates (x, y)
+     */
+    std::pair<uint, uint> calculateNextMove(Map &map) {
+        // Пример реализации: движемся на одну клетку вправо, если это возможно
+        auto nextX = x + 1;
+        auto nextY = y;
+        if (map.isValidCoordinate(nextX, nextY) && map.getCell({nextX, nextY})->isAccessible()) {
+            return {nextX, nextY};
+        }
+        // Если вправо нельзя, остаёмся на месте
+        return {x, y};
+    }
+
+    /**
+     * @brief Check if an intruder is within the detection radius
+     * @param intruderCoords - Coordinates of the intruder
+     * @return True if within detection radius, false otherwise
+     */
+    bool isWithinDetectionRadius(const std::pair<uint, uint> &intruderCoords) const {
+        uint dx = std::abs(static_cast<int>(intruderCoords.first) - static_cast<int>(x));
+        uint dy = std::abs(static_cast<int>(intruderCoords.second) - static_cast<int>(y));
+        return std::sqrt(dx * dx + dy * dy) <= detectionRadius;
+    }
 };
 
-#endif //LAB3_QUANTUMPLATFORM_H
+#endif // LAB3_QUANTUMPLATFORM_H

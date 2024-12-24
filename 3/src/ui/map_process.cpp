@@ -9,40 +9,63 @@ CellType charToCellType(char c) {
             return CellType::OBSTACLE;
         case 'P':
             return CellType::STATACTIVEPLATFORM;
-        case 'p':
-            return CellType::STATPASSIVEPLATFORM;
         case 'M':
             return CellType::MOBACTIVEPLATFORM;
-        case 'm':
-            return CellType::MOBPASSIVEPLATFORM;
-        case 'N':
-            return CellType::NETACTIVE;
-        case 'n':
-            return CellType::NETPASSIVE;
-        case 'O':
-            return CellType::SENSOROPTICACTIVE;
-        case 'o':
-            return CellType::SENSOROPTICPASSIVE;
-        case 'X':
-            return CellType::SENSORXRAYACTIVE;
-        case 'x':
-            return CellType::SENSORXRAYPASSIVE;
-        case 'W':
-            return CellType::WEAPONACTIVE;
-        case 'w':
-            return CellType::WEAPONPASSIVE;
         case 'I':
             return CellType::INTRUDER;
+        case 'Q':
+            return CellType::QUANTUMPLATFORM;
+        case 'W':
+            return CellType::WEAPONACTIVE;
+        case 'O':
+            return CellType::SENSOROPTICACTIVE;
         default:
-            throw std::invalid_argument("Unknown character in map file");
+            std::cout << c << std::endl;
+            throw std::invalid_argument("Unknown cell type in map file");
     }
 }
 
 
+std::vector<std::string> parseModules(const std::string &data) {
+    std::vector<std::string> modules;
+    std::stack<char> brackets;
+    std::string module;
+
+    for (char ch: data) {
+        if (ch == '(') {
+            brackets.push(ch);
+        } else if (ch == ')') {
+            if (brackets.empty()) {
+                throw std::invalid_argument("Mismatched parentheses in module data");
+            }
+            brackets.pop();
+        }
+
+        if (brackets.empty() && ch == ',') {
+            modules.push_back(module);
+            module.clear();
+        } else {
+            module += ch;
+        }
+    }
+
+    if (!module.empty()) {
+        modules.push_back(module);
+    }
+
+    if (!brackets.empty()) {
+        throw std::invalid_argument("Unclosed parentheses in module data");
+    }
+
+    return modules;
+}
+
+// Чтение карты из файла
 Map read_map_from_file(const std::string &filename,
                        std::vector<Intruder> &intruders,
-                       std::vector<MobilePlatform> &platforms,
-                       std::vector<StationaryPlatform> &stationaryPlatforms) {
+                       std::vector<MobilePlatform> &mobilePlatforms,
+                       std::vector<StationaryPlatform> &stationaryPlatforms,
+                       std::vector<QuantumPlatform> &quantumPlatforms) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         throw std::runtime_error("Error opening map file");
@@ -64,11 +87,10 @@ Map read_map_from_file(const std::string &filename,
         throw std::runtime_error("Map file is empty");
     }
 
-    // Определяем размеры карты
     uint height = lines.size();
     uint width = 0;
 
-    for (const auto &line : lines) {
+    for (const auto &line: lines) {
         std::stringstream ss(line);
         std::string cell;
         uint current_width = 0;
@@ -78,11 +100,11 @@ Map read_map_from_file(const std::string &filename,
         width = std::max(width, current_width);
     }
 
-    // Создаём карту
     Map map(width, height);
     map.resizeMap({width, height});
 
-    // Обработка строк карты
+    std::regex cell_regex(R"(([PMQI#\.Q])(\((.*)\))?)");
+
     for (uint y = 0; y < height; ++y) {
         const auto &line = lines[y];
         std::stringstream ss(line);
@@ -91,44 +113,37 @@ Map read_map_from_file(const std::string &filename,
 
         while (std::getline(ss, cell, ';')) {
             try {
-                // Регулярное выражение для разбора клетки с модулями
-                std::regex platform_regex(R"(([PM])\(([^)]*)\))");
-                std::smatch match;
+                std::cout << "Processing cell at (" << x << ", " << y << "): \"" << cell << "\"" << std::endl;
 
-                // Определяем тип клетки
-                if (std::regex_match(cell, match, platform_regex)) {
+                std::smatch match;
+                if (std::regex_match(cell, match, cell_regex)) {
                     char type_char = match[1].str()[0];
-                    std::string modules = match[2];
+                    std::string module_data = match[3].str();
 
                     CellType type = charToCellType(type_char);
                     std::shared_ptr<Cell> cell_ptr = std::make_shared<Cell>(type, x, y);
                     map.setCell({x, y}, cell_ptr);
 
-                    // Разбираем модули
-                    std::vector<std::string> module_list;
-                    std::stringstream module_stream(modules);
-                    std::string module;
-                    while (std::getline(module_stream, module, ',')) {
-                        module_list.push_back(module);
+                    if (!module_data.empty()) {
+                        auto modules = parseModules(module_data);
+                        for (const auto &module: modules) {
+                            std::cout << "  Found module: " << module << std::endl;
+                            if (type == CellType::MOBACTIVEPLATFORM) {
+                                mobilePlatforms.emplace_back(x, y, module, 100, 3);
+                            } else if (type == CellType::STATACTIVEPLATFORM) {
+                                stationaryPlatforms.emplace_back(x, y, module, 100, 3);
+                            } else if (type == CellType::QUANTUMPLATFORM) {
+                                quantumPlatforms.emplace_back(x, y, std::string(module), 100, 1);
+
+                            }
+                        }
                     }
 
-                    // Создаём платформы
-                    if (type == CellType::MOBACTIVEPLATFORM) {
-                        platforms.emplace_back(x, y, "MobilePlatform", 100, 3);
-                    } else if (type == CellType::STATACTIVEPLATFORM) {
-                        stationaryPlatforms.emplace_back(x, y, "StaticPlatform", 100, 3);
-                    }
-                } else {
-                    // Обычная клетка
-                    char c = cell[0];
-                    CellType type = charToCellType(c);
-                    std::shared_ptr<Cell> cell_ptr = std::make_shared<Cell>(type, x, y);
-                    map.setCell({x, y}, cell_ptr);
-
-                    // Создаём объекты для Intruder
                     if (type == CellType::INTRUDER) {
                         intruders.emplace_back(x, y);
                     }
+                } else {
+                    throw std::invalid_argument("Invalid cell format");
                 }
             } catch (const std::exception &e) {
                 std::cerr << "Error processing cell at (" << x << ", " << y << "): " << e.what() << std::endl;
@@ -141,9 +156,52 @@ Map read_map_from_file(const std::string &filename,
     return map;
 }
 
+// Добавляем поддержку цветов (опционально)
+#ifdef _WIN32
+#include <windows.h>
+void enableAnsiColors() {
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut == INVALID_HANDLE_VALUE) return;
 
+    DWORD dwMode = 0;
+    if (!GetConsoleMode(hOut, &dwMode)) return;
+
+    SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+}
+#else
+
+void enableAnsiColors() {}
+
+#endif
+
+
+// Цвета для типов ячеек
+const std::map<CellType, std::string> cellColors = {
+        {CellType::EMPTY,               "\033[0;37m"},
+        {CellType::OBSTACLE,            "\033[1;30m"},
+        {CellType::STATACTIVEPLATFORM,  "\033[0;32m"},
+        {CellType::STATPASSIVEPLATFORM, "\033[0;34m"},
+        {CellType::MOBACTIVEPLATFORM,   "\033[1;32m"},
+        {CellType::MOBPASSIVEPLATFORM,  "\033[1;34m"},
+        {CellType::NETACTIVE,           "\033[0;33m"},
+        {CellType::NETPASSIVE,          "\033[1;33m"},
+        {CellType::SENSOROPTICACTIVE,   "\033[0;36m"},
+        {CellType::SENSOROPTICPASSIVE,  "\033[1;36m"},
+        {CellType::SENSORXRAYACTIVE,    "\033[0;35m"},
+        {CellType::SENSORXRAYPASSIVE,   "\033[1;35m"},
+        {CellType::WEAPONACTIVE,        "\033[0;31m"},
+        {CellType::WEAPONPASSIVE,       "\033[1;31m"},
+        {CellType::INTRUDER,            "\033[1;37m"},
+        {CellType::QUANTUMPLATFORM,     "\033[0;35m"}, // Цвет для квантовой платформы
+};
+
+
+// Сброс цвета
+const std::string resetColor = "\033[0m";
 
 void show_map(const Map &map) {
+    enableAnsiColors();
+
     auto [width, height] = map.getShape();
 
     // Верхняя рамка
@@ -158,7 +216,11 @@ void show_map(const Map &map) {
         for (uint x = 0; x < width; ++x) {
             std::shared_ptr<Cell> cell = map.getCell({x, y});
             if (cell) {
-                switch (cell->getType()) {
+                auto type = cell->getType();
+                auto color = cellColors.count(type) ? cellColors.at(type) : "";
+                std::cout << color;
+
+                switch (type) {
                     case CellType::EMPTY:
                         std::cout << ".";
                         break;
@@ -204,10 +266,15 @@ void show_map(const Map &map) {
                     case CellType::INTRUDER:
                         std::cout << "I";
                         break;
+                    case CellType::QUANTUMPLATFORM:
+                        std::cout << "Q";
+                        break;
                     default:
                         std::cout << "?";
                         break;
                 }
+
+                std::cout << resetColor;
             } else {
                 std::cout << " ";
             }
@@ -220,6 +287,7 @@ void show_map(const Map &map) {
 }
 
 
+// Легенда
 void show_legend() {
     std::cout << "Legend:\n";
     std::cout << "  . - Empty\n";
@@ -233,9 +301,9 @@ void show_legend() {
     std::cout << "  O, o - Optical Sensor\n";
     std::cout << "  X, x - X-ray Sensor\n";
     std::cout << "  W, w - Weapon\n";
+    std::cout << "  Q - Quantum Platform\n";
     std::cout << std::endl;
 }
-
 
 
 // Функция перемещения для Intruder
@@ -278,21 +346,27 @@ void move_platform(MobilePlatform &platform, Map &map, std::mutex &map_mutex) {
     }
 }
 
-// Основная функция обновления карты
-void update_map(Map &map, std::vector<Intruder> &intruders, std::vector<MobilePlatform> &platforms) {
+void update_map(Map &map, std::vector<Intruder> &intruders,
+                std::vector<MobilePlatform> &mobilePlatforms,
+                std::vector<QuantumPlatform> &quantumPlatforms) {
     std::mutex map_mutex; // Мьютекс для защиты карты
 
-    // Векторы потоков
     std::vector<std::thread> threads;
 
-    // Создаём потоки для Intruders
+    // Создаем потоки для Intruders
     for (auto &intruder: intruders) {
         threads.emplace_back(move_intruder, std::ref(intruder), std::ref(map), std::ref(map_mutex));
     }
 
-    // Создаём потоки для MobilePlatforms
-    for (auto &platform: platforms) {
+    // Создаем потоки для MobilePlatforms
+    for (auto &platform: mobilePlatforms) {
         threads.emplace_back(move_platform, std::ref(platform), std::ref(map), std::ref(map_mutex));
+    }
+
+    // Создаем потоки для QuantumPlatforms
+    for (auto &platform: quantumPlatforms) {
+        threads.emplace_back(move_quantum_platform, std::ref(platform), std::ref(map),
+                             std::ref(map_mutex), std::ref(intruders));
     }
 
     // Ожидаем завершения всех потоков
@@ -300,5 +374,39 @@ void update_map(Map &map, std::vector<Intruder> &intruders, std::vector<MobilePl
         if (thread.joinable()) {
             thread.join();
         }
+    }
+}
+
+
+void move_quantum_platform(QuantumPlatform &platform, Map &map, std::mutex &map_mutex,
+                           std::vector<Intruder> &intruders) {
+    try {
+        auto current_coords = platform.getCoordinates();
+        auto next_coords = platform.calculateNextMove(map); // Реализуйте метод calculateNextMove
+
+        std::lock_guard<std::mutex> lock(map_mutex);
+
+        if (map.getCell(next_coords)->isAccessible()) {
+            // Телепортируем нарушителей
+            std::vector<std::pair<uint, uint>> intruderPositions;
+            for (auto &intruder: intruders) {
+                if (platform.isWithinDetectionRadius(intruder.getCoordinates())) { // Реализуйте isWithinDetectionRadius
+                    intruderPositions.push_back(intruder.getCoordinates());
+                    intruder.setCoordinates(next_coords.first, next_coords.second);
+                }
+            }
+
+            platform.teleportIntruders(intruderPositions);
+
+            // Обновляем карту
+            map.getCell(current_coords)->setType(CellType::EMPTY);
+            map.getCell(next_coords)->setType(CellType::QUANTUMPLATFORM);
+            platform.setCoordinates(next_coords.first, next_coords.second);
+        } else {
+            std::cout << "Cell (" << next_coords.first << ", " << next_coords.second
+                      << ") is not accessible for QuantumPlatform. Stays in place.\n";
+        }
+    } catch (const std::exception &e) {
+        std::cerr << "Error during quantum platform movement: " << e.what() << std::endl;
     }
 }

@@ -10,25 +10,38 @@
 #include <memory>
 #include <sstream>
 #include <regex>
+#include <map>
+#include <string>
 #include "../model/Map.h"
 #include "../model/Cell.h"
 #include "../model/Intruder.h"
 #include "../model/MobilePlatform.h"
 #include "../model/StationaryPlatform.h"
+#include "../model/QuantumPlatform.h"
 
 CellType charToCellType(char c);
 
-Map read_map_from_file(const std::string &filename);
-
-void show_map(const Map &map);
-
-void update_map(Map &map, std::vector<Intruder> &intruders, std::vector<MobilePlatform> &platforms);
+std::vector<std::string> parseModules(const std::string &data);
 
 Map read_map_from_file(const std::string &filename,
                        std::vector<Intruder> &intruders,
-                       std::vector<MobilePlatform> &platforms,
-                       std::vector<StationaryPlatform> &stationaryPlatforms);
+                       std::vector<MobilePlatform> &mobilePlatforms,
+                       std::vector<StationaryPlatform> &stationaryPlatforms,
+                       std::vector<QuantumPlatform> &quantumPlatforms);
+
+void show_map(const Map &map);
+
+void update_map(Map &map, std::vector<Intruder> &intruders,
+                std::vector<MobilePlatform> &mobilePlatforms,
+                std::vector<QuantumPlatform> &quantumPlatforms);
 
 void show_legend();
+
+void move_intruder(Intruder &intruder, Map &map, std::mutex &map_mutex);
+
+void move_platform(MobilePlatform &platform, Map &map, std::mutex &map_mutex);
+
+void move_quantum_platform(QuantumPlatform &platform, Map &map, std::mutex &map_mutex,
+                           std::vector<Intruder> &intruders);
 
 #endif //LAB3_MAP_PROCESS_H

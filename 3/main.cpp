@@ -7,12 +7,11 @@ int main() {
         std::vector<Intruder> intruders;
         std::vector<MobilePlatform> mobilePlatforms;
         std::vector<StationaryPlatform> stationaryPlatforms;
+        std::vector<QuantumPlatform> quantumPlatforms;
 
 
-        // Считываем карту и создаём объекты
-        Map map = read_map_from_file(filename, intruders, mobilePlatforms, stationaryPlatforms);
+        Map map = read_map_from_file(filename, intruders, mobilePlatforms, stationaryPlatforms, quantumPlatforms);
 
-        // Пример настройки MobilePlatform
         if (!mobilePlatforms.empty()) {
             mobilePlatforms[0].setSpeed(1);
         }
@@ -25,7 +24,7 @@ int main() {
             std::cout << "Updating map...\n";
 
             // Обновление карты для всех объектов
-            update_map(map, intruders, mobilePlatforms);
+            update_map(map, intruders, mobilePlatforms, quantumPlatforms);
 
             // Отображение карты
             show_map(map);
